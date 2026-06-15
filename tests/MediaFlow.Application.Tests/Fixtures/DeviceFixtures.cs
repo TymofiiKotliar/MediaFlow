@@ -1,5 +1,6 @@
 using MediaFlow.Application.Validation;
 using MediaFlow.Domain.Entities;
+using MediaFlow.Domain.Enums;
 
 namespace MediaFlow.Application.Tests.Fixtures;
 
@@ -24,4 +25,15 @@ internal static class DeviceFixtures
             TelegramBotToken: "old-token",
             TelegramChatId: "111111111",
             FilesPerLoad: 50);
+
+    internal static FileContext ImageFile(
+        string name = "photo.jpg",
+        MediaAction actions = MediaAction.None,
+        string? exifCaptureDate = null) =>
+        new(name, $@"C:\Source\{name}", $@"C:\Temp\{name}", FileType.Image, actions, exifCaptureDate);
+
+    internal static FileContext VideoFile(
+        string name = "clip.mp4",
+        MediaAction actions = MediaAction.None) =>
+        new(name, $@"C:\Source\{name}", $@"C:\Temp\{name}", FileType.Video, actions, null);
 }

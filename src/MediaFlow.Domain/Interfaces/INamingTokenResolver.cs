@@ -6,5 +6,5 @@ namespace MediaFlow.Domain.Interfaces;
 public interface INamingTokenResolver
 {
     bool CanResolve(NamingToken token);
-    string Resolve(NamingToken token, FileContext context, int sequenceNumber);
+    string Resolve(NamingToken token, string? exifCaptureDate, int sequenceNumber);
 }
