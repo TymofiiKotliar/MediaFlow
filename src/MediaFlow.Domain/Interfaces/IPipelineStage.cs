@@ -5,6 +5,6 @@ namespace MediaFlow.Domain.Interfaces;
 
 public interface IPipelineStage
 {
-    Task<(FileContext Context, PipelineStageResult Result)> ExecuteAsync(
-        FileContext context, CancellationToken ct);
+    Task<(PipelineContext Context, PipelineStageResult Result)> ExecuteAsync(
+        PipelineContext context, CancellationToken ct);
 }
