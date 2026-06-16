@@ -1,13 +1,13 @@
 # Project Overview
 ## What is the project?
-**PhotoSaver** is a desktop application for managing and processing media files from cameras and other recording devices. The user registers any number of devices, browses the files on each device from within the app, and runs a configurable processing pipeline that can rotate, rename, back up, and forward media to a Telegram chat — all in one click.
+**MediaFlow** is a desktop application for managing and processing media files from cameras and other recording devices. The user registers any number of devices, browses the files on each device from within the app, and runs a configurable processing pipeline that can rotate, rename, back up, and forward media to a Telegram chat — all in one click.
 
 The application is built around the concept of a **device profile**: a named configuration that records where source files live, where the backup copy should go, how the output files should be named, and which Telegram destination should receive them. Device profiles persist between sessions, so routine offload workflows require no repeated configuration.
 
 ## What problem does it solve?
 Photographers and videographers who shoot regularly face a repetitive manual workflow after each session: copy files, rename them consistently, apply orientation fixes, and distribute them. Doing this by hand is slow and error-prone; generic file managers offer no per-device defaults or automation.
 
-**PhotoSaver** compresses this multi-step routine into a single action: select files, confirm the per-file actions via checkboxes, click run, and watch a progress view complete the work. The destination is always pre-configured and the naming scheme is always consistent, eliminating the most common mistakes.
+**MediaFlow** compresses this multi-step routine into a single action: select files, confirm the per-file actions via checkboxes, click run, and watch a progress view complete the work. The destination is always pre-configured and the naming scheme is always consistent, eliminating the most common mistakes.
 
 ## Who is it for?
 The application targets **individual photographers, videographers, and content creators** who:
@@ -512,7 +512,7 @@ The outermost layer. Contains all UI screens, controllers, and view models. It d
 
 **Tasks:**
 1. **Device repository adapter** — store and query `DeviceProfile` documents in a LiteDB collection in the application data folder. The adapter exposes insert, update, delete, and query methods; callers pass LINQ expressions for filtering and ordering. The LiteDB dependency is confined to this adapter — the domain interface accepts and returns plain `DeviceProfile` records.
-2. **File system adapter** — implement file copy (backup), move, delete, directory scan, and temp folder management. Initialise the application folders (`~/.PhotoSaver/images/`, `~/.PhotoSaver/temp/`) on first run.
+2. **File system adapter** — implement file copy (backup), move, delete, directory scan, and temp folder management. Initialise the application folders (`~/.MediaFlow/images/`, `~/.MediaFlow/temp/`) on first run.
 3. **Metadata adapter** — use MetadataExtractor to read EXIF `Orientation` and `DateTimeOriginal`. Return typed results; never throw into the domain.
 4. **Media processor adapter** — use FFMpegCore to implement: thumbnail extraction (image and video), left/right/flip rotation, AVI/MOV → MP4 conversion. Each operation is a separate method implementing `IPipelineStage`.
 5. **Telegram adapter** — implement the send stage using Telegram.Bot's `SendPhotoAsync` / `SendVideoAsync`. Accept a `CancellationToken`; map API errors to `PipelineStageResult.Failed`.
