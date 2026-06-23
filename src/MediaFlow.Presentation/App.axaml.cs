@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -23,11 +24,7 @@ public partial class App : Avalonia.Application
         Services = services.BuildServiceProvider();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            var window = Services.GetRequiredService<MainWindow>();
-            window.DataContext = Services.GetRequiredService<MainWindowViewModel>();
-            desktop.MainWindow = window;
-        }
+            desktop.MainWindow = Services.GetRequiredService<MainWindow>();
 
         base.OnFrameworkInitializationCompleted();
     }
