@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
@@ -27,7 +28,6 @@ public sealed class ProfileEditorViewModel : ViewModelBase
     private string _filesPerLoad = "50";
     private string _prefixInput = "";
     private string _namingPreview = "";
-    private bool _hasErrors;
 
     public string Name
     {
@@ -77,16 +77,58 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _namingPreview, value);
     }
 
-    public bool HasErrors
+    private string? _nameError;
+    private string? _sourceFolderError;
+    private string? _backupFolderError;
+    private string? _filesPerLoadError;
+    private string? _telegramBotTokenError;
+    private string? _telegramChatIdError;
+
+    public string? NameError
     {
-        get => _hasErrors;
-        private set => this.RaiseAndSetIfChanged(ref _hasErrors, value);
+        get => _nameError;
+        private set { this.RaiseAndSetIfChanged(ref _nameError, value); this.RaisePropertyChanged(nameof(HasNameError)); }
     }
+    public bool HasNameError => _nameError is not null;
+
+    public string? SourceFolderError
+    {
+        get => _sourceFolderError;
+        private set { this.RaiseAndSetIfChanged(ref _sourceFolderError, value); this.RaisePropertyChanged(nameof(HasSourceFolderError)); }
+    }
+    public bool HasSourceFolderError => _sourceFolderError is not null;
+
+    public string? BackupFolderError
+    {
+        get => _backupFolderError;
+        private set { this.RaiseAndSetIfChanged(ref _backupFolderError, value); this.RaisePropertyChanged(nameof(HasBackupFolderError)); }
+    }
+    public bool HasBackupFolderError => _backupFolderError is not null;
+
+    public string? FilesPerLoadError
+    {
+        get => _filesPerLoadError;
+        private set { this.RaiseAndSetIfChanged(ref _filesPerLoadError, value); this.RaisePropertyChanged(nameof(HasFilesPerLoadError)); }
+    }
+    public bool HasFilesPerLoadError => _filesPerLoadError is not null;
+
+    public string? TelegramBotTokenError
+    {
+        get => _telegramBotTokenError;
+        private set { this.RaiseAndSetIfChanged(ref _telegramBotTokenError, value); this.RaisePropertyChanged(nameof(HasTelegramBotTokenError)); }
+    }
+    public bool HasTelegramBotTokenError => _telegramBotTokenError is not null;
+
+    public string? TelegramChatIdError
+    {
+        get => _telegramChatIdError;
+        private set { this.RaiseAndSetIfChanged(ref _telegramChatIdError, value); this.RaisePropertyChanged(nameof(HasTelegramChatIdError)); }
+    }
+    public bool HasTelegramChatIdError => _telegramChatIdError is not null;
 
     public string Title => _editingId is null ? "New Device" : "Edit Device";
 
     public ObservableCollection<NamingChipViewModel> Chips { get; } = [];
-    public ObservableCollection<string> Errors { get; } = [];
 
     // Set by the View after DataContext is assigned, so Browse commands can open a folder picker.
     public Func<Task<string?>>? BrowseFolderFunc { get; set; }
@@ -113,7 +155,6 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         _buildNaming = buildNaming;
 
         Chips.CollectionChanged += (_, _) => UpdatePreview();
-        Errors.CollectionChanged += (_, _) => HasErrors = Errors.Count > 0;
 
         var hasPrefixInput = this.WhenAnyValue(x => x.PrefixInput)
             .Select(s => !string.IsNullOrWhiteSpace(s));
@@ -146,7 +187,7 @@ public sealed class ProfileEditorViewModel : ViewModelBase
             foreach (var token in profile.NamingTemplate)
                 AddChip(token);
 
-        Errors.Clear();
+        ClearErrors();
         this.RaisePropertyChanged(nameof(Title));
     }
 
@@ -184,9 +225,32 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         if (path is not null) BackupFolderPath = path;
     }
 
+    private void ClearErrors()
+    {
+        NameError = null;
+        SourceFolderError = null;
+        BackupFolderError = null;
+        FilesPerLoadError = null;
+        TelegramBotTokenError = null;
+        TelegramChatIdError = null;
+    }
+
+    private void ApplyErrors(IReadOnlyList<string> errors)
+    {
+        foreach (var e in errors)
+        {
+            if (e.StartsWith("Device name"))            NameError = e;
+            else if (e.StartsWith("Source folder"))     SourceFolderError = e;
+            else if (e.StartsWith("Backup folder"))     BackupFolderError = e;
+            else if (e.StartsWith("Files per load"))    FilesPerLoadError = e;
+            else if (e.StartsWith("Telegram bot token")) TelegramBotTokenError = e;
+            else if (e.StartsWith("Telegram chat ID"))  TelegramChatIdError = e;
+        }
+    }
+
     private async Task SaveAsync()
     {
-        Errors.Clear();
+        ClearErrors();
 
         if (!int.TryParse(FilesPerLoad, out var filesPerLoad))
             filesPerLoad = 0;
@@ -205,7 +269,7 @@ public sealed class ProfileEditorViewModel : ViewModelBase
             var result = await _register.ExecuteAsync(input);
             if (result is RegisterDeviceResult.ValidationFailed vf)
             {
-                foreach (var e in vf.Errors) Errors.Add(e);
+                ApplyErrors(vf.Errors);
                 return;
             }
         }
@@ -214,7 +278,7 @@ public sealed class ProfileEditorViewModel : ViewModelBase
             var result = await _edit.ExecuteAsync(_editingId, input);
             if (result is EditDeviceResult.ValidationFailed vf)
             {
-                foreach (var e in vf.Errors) Errors.Add(e);
+                ApplyErrors(vf.Errors);
                 return;
             }
         }

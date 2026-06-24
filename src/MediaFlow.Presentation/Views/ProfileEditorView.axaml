@@ -93,6 +93,16 @@
             <Setter Property="Background" Value="Transparent"/>
         </Style>
 
+        <Style Selector="TextBox.error">
+            <Setter Property="BorderBrush" Value="#DC2626"/>
+        </Style>
+
+        <Style Selector="TextBlock.field-error">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#DC2626"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
+        </Style>
+
     </UserControl.Styles>
 
     <ScrollViewer>
@@ -116,10 +126,15 @@
                 </StackPanel>
 
                 <!-- ── Device name ── -->
-                <TextBlock Classes="field-label" Text="DEVICE NAME"/>
-                <TextBox Text="{Binding Name}"
-                         Watermark="e.g. Canon EOS R5"
-                         Margin="0,0,0,20"/>
+                <StackPanel Margin="0,0,0,20">
+                    <TextBlock Classes="field-label" Text="DEVICE NAME"/>
+                    <TextBox Text="{Binding Name}"
+                             Watermark="e.g. Canon EOS R5"
+                             Classes.error="{Binding HasNameError}"/>
+                    <TextBlock Classes="field-error"
+                               Text="{Binding NameError}"
+                               IsVisible="{Binding HasNameError}"/>
+                </StackPanel>
 
                 <!-- ── Source + Backup folders ── -->
                 <Grid ColumnDefinitions="*,24,*" Margin="0,0,0,20">
@@ -129,13 +144,17 @@
                         <Grid ColumnDefinitions="*,8,Auto">
                             <TextBox Grid.Column="0"
                                      Text="{Binding SourceFolderPath}"
-                                     Watermark="/Volumes/Camera/DCIM"/>
+                                     Watermark="/Volumes/Camera/DCIM"
+                                     Classes.error="{Binding HasSourceFolderError}"/>
                             <Button Grid.Column="2"
                                     Classes="browse"
                                     Command="{Binding BrowseSourceCommand}">
                                 Browse
                             </Button>
                         </Grid>
+                        <TextBlock Classes="field-error"
+                                   Text="{Binding SourceFolderError}"
+                                   IsVisible="{Binding HasSourceFolderError}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Spacing="0">
@@ -143,13 +162,17 @@
                         <Grid ColumnDefinitions="*,8,Auto">
                             <TextBox Grid.Column="0"
                                      Text="{Binding BackupFolderPath}"
-                                     Watermark="~/Pictures/Backup"/>
+                                     Watermark="~/Pictures/Backup"
+                                     Classes.error="{Binding HasBackupFolderError}"/>
                             <Button Grid.Column="2"
                                     Classes="browse"
                                     Command="{Binding BrowseBackupCommand}">
                                 Browse
                             </Button>
                         </Grid>
+                        <TextBlock Classes="field-error"
+                                   Text="{Binding BackupFolderError}"
+                                   IsVisible="{Binding HasBackupFolderError}"/>
                     </StackPanel>
 
                 </Grid>
@@ -159,20 +182,32 @@
 
                     <StackPanel Grid.Column="0" Spacing="0">
                         <TextBlock Classes="field-label" Text="FILES / LOAD"/>
-                        <TextBox Text="{Binding FilesPerLoad}"/>
+                        <TextBox Text="{Binding FilesPerLoad}"
+                                 Classes.error="{Binding HasFilesPerLoadError}"/>
+                        <TextBlock Classes="field-error"
+                                   Text="{Binding FilesPerLoadError}"
+                                   IsVisible="{Binding HasFilesPerLoadError}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2" Spacing="0">
                         <TextBlock Classes="field-label" Text="TELEGRAM BOT TOKEN"/>
                         <TextBox Text="{Binding TelegramBotToken}"
                                  PasswordChar="•"
-                                 Watermark="1234567890:ABCDEFGHijklmn…"/>
+                                 Watermark="1234567890:ABCDEFGHijklmn…"
+                                 Classes.error="{Binding HasTelegramBotTokenError}"/>
+                        <TextBlock Classes="field-error"
+                                   Text="{Binding TelegramBotTokenError}"
+                                   IsVisible="{Binding HasTelegramBotTokenError}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="4" Spacing="0">
                         <TextBlock Classes="field-label" Text="CHAT ID"/>
                         <TextBox Text="{Binding TelegramChatId}"
-                                 Watermark="-1001234567890"/>
+                                 Watermark="-1001234567890"
+                                 Classes.error="{Binding HasTelegramChatIdError}"/>
+                        <TextBlock Classes="field-error"
+                                   Text="{Binding TelegramChatIdError}"
+                                   IsVisible="{Binding HasTelegramChatIdError}"/>
                     </StackPanel>
 
                 </Grid>
@@ -288,20 +323,6 @@
 
                     </StackPanel>
                 </Border>
-
-                <!-- ── Validation errors ── -->
-                <ItemsControl ItemsSource="{Binding Errors}"
-                              IsVisible="{Binding HasErrors}"
-                              Margin="0,0,0,16">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}"
-                                       FontSize="12"
-                                       Foreground="#DC2626"
-                                       Margin="0,2"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
 
                 <!-- ── Action buttons ── -->
                 <StackPanel Orientation="Horizontal"
