@@ -19,6 +19,7 @@ public partial class App : Avalonia.Application
     {
         var services = new ServiceCollection();
         services.AddMediaFlowServices();
+        services.AddTransient<DeviceListViewModel>();
         services.AddTransient<MainWindowViewModel>();
         services.AddTransient<MainWindow>();
         Services = services.BuildServiceProvider();
