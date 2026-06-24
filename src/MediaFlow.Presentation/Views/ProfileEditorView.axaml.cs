@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Platform.Storage;
 using MediaFlow.Presentation.ViewModels;
 
@@ -18,6 +19,12 @@ public partial class ProfileEditorView : UserControl
     {
         if (DataContext is ProfileEditorViewModel vm)
             vm.BrowseFolderFunc = BrowseFolderAsync;
+    }
+
+    private void OnChipAreaPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is ProfileEditorViewModel vm)
+            vm.MoveCursorToEnd();
     }
 
     private async Task<string?> BrowseFolderAsync()

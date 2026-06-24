@@ -130,6 +130,8 @@ public sealed class ProfileEditorViewModel : ViewModelBase
 
     public ObservableCollection<NamingChipViewModel> Chips { get; } = [];
 
+    private readonly NamingChipViewModel _cursor = new();
+
     // Set by the View after DataContext is assigned, so Browse commands can open a folder picker.
     public Func<Task<string?>>? BrowseFolderFunc { get; set; }
 
@@ -155,6 +157,7 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         _buildNaming = buildNaming;
 
         Chips.CollectionChanged += (_, _) => UpdatePreview();
+        Chips.Add(_cursor);
 
         var hasPrefixInput = this.WhenAnyValue(x => x.PrefixInput)
             .Select(s => !string.IsNullOrWhiteSpace(s));
@@ -185,7 +188,8 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         Chips.Clear();
         if (profile?.NamingTemplate is not null)
             foreach (var token in profile.NamingTemplate)
-                AddChip(token);
+                Chips.Add(CreateTokenChip(token));
+        Chips.Add(_cursor);
 
         ClearErrors();
         this.RaisePropertyChanged(nameof(Title));
@@ -198,16 +202,39 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         PrefixInput = "";
     }
 
-    private void AddChip(NamingToken token)
+    private NamingChipViewModel CreateTokenChip(NamingToken token)
     {
         NamingChipViewModel? chip = null;
-        chip = new NamingChipViewModel(token, () => Chips.Remove(chip!));
-        Chips.Add(chip);
+        chip = new NamingChipViewModel(
+            token,
+            onRemove: () => Chips.Remove(chip!),
+            onInsertBefore: () => MoveCursorBefore(chip!));
+        return chip;
+    }
+
+    private void AddChip(NamingToken token)
+    {
+        var chip = CreateTokenChip(token);
+        var cursorIndex = Chips.IndexOf(_cursor);
+        Chips.Insert(cursorIndex, chip);
+    }
+
+    private void MoveCursorBefore(NamingChipViewModel target)
+    {
+        Chips.Remove(_cursor);
+        Chips.Insert(Chips.IndexOf(target), _cursor);
+    }
+
+    public void MoveCursorToEnd()
+    {
+        if (Chips.LastOrDefault() == _cursor) return;
+        Chips.Remove(_cursor);
+        Chips.Add(_cursor);
     }
 
     private void UpdatePreview()
     {
-        var template = Chips.Select(c => c.Token).ToList();
+        var template = Chips.Where(c => !c.IsCursor).Select(c => c.Token!).ToList();
         NamingPreview = _buildNaming.Execute(template, "example.jpg", null, 1);
     }
 
@@ -259,7 +286,7 @@ public sealed class ProfileEditorViewModel : ViewModelBase
             Name: Name,
             SourceFolderPath: SourceFolderPath,
             BackupFolderPath: BackupFolderPath,
-            NamingTemplate: Chips.Select(c => c.Token).ToList(),
+            NamingTemplate: Chips.Where(c => !c.IsCursor).Select(c => c.Token!).ToList(),
             TelegramBotToken: TelegramBotToken,
             TelegramChatId: TelegramChatId,
             FilesPerLoad: filesPerLoad);

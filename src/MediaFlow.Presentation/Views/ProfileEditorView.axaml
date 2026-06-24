@@ -59,6 +59,16 @@
             <Setter Property="Background" Value="Transparent"/>
         </Style>
 
+        <Style Selector="Button.chip-label">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.chip-label:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
         <Style Selector="Button.primary">
             <Setter Property="Background" Value="#1C1C1C"/>
             <Setter Property="Foreground" Value="White"/>
@@ -242,7 +252,8 @@
                                 BorderThickness="1"
                                 CornerRadius="6"
                                 Padding="10,8"
-                                MinHeight="42">
+                                MinHeight="42"
+                                PointerPressed="OnChipAreaPointerPressed">
                             <ItemsControl ItemsSource="{Binding Chips}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -251,26 +262,40 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Margin="0,2,6,2"
-                                                CornerRadius="4"
-                                                Padding="8,3,4,3"
-                                                Background="#E8E5DF"
-                                                BorderBrush="#D5D2CB"
-                                                BorderThickness="1">
-                                            <StackPanel Orientation="Horizontal" Spacing="3">
-                                                <TextBlock Text="{Binding Label}"
-                                                           FontSize="12"
-                                                           Foreground="#3A3835"
-                                                           VerticalAlignment="Center"/>
-                                                <Button Classes="chip-remove"
-                                                        Command="{Binding RemoveCommand}"
-                                                        VerticalAlignment="Center">
-                                                    <TextBlock Text="×"
-                                                               FontSize="13"
-                                                               Foreground="#A09D97"/>
-                                                </Button>
-                                            </StackPanel>
-                                        </Border>
+                                        <Grid>
+                                            <!-- Cursor branch -->
+                                            <Border IsVisible="{Binding IsCursor}"
+                                                    Width="2"
+                                                    Background="#888888"
+                                                    Margin="2,4"
+                                                    VerticalAlignment="Stretch"/>
+
+                                            <!-- Chip branch -->
+                                            <Border IsVisible="{Binding IsNotCursor}"
+                                                    Margin="0,2,6,2"
+                                                    CornerRadius="4"
+                                                    Background="#E8E5DF"
+                                                    BorderBrush="#D5D2CB"
+                                                    BorderThickness="1">
+                                                <StackPanel Orientation="Horizontal" Spacing="0">
+                                                    <Button Classes="chip-label"
+                                                            Command="{Binding InsertBeforeCommand}"
+                                                            VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Label}"
+                                                                   FontSize="12"
+                                                                   Foreground="#3A3835"/>
+                                                    </Button>
+                                                    <Button Classes="chip-remove"
+                                                            Command="{Binding RemoveCommand}"
+                                                            VerticalAlignment="Center"
+                                                            Padding="4,3">
+                                                        <TextBlock Text="×"
+                                                                   FontSize="13"
+                                                                   Foreground="#A09D97"/>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
