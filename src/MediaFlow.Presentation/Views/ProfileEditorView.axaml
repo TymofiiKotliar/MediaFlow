@@ -1,0 +1,318 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:MediaFlow.Presentation.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1020" d:DesignHeight="800"
+             x:Class="MediaFlow.Presentation.Views.ProfileEditorView"
+             Background="White">
+
+    <UserControl.Styles>
+
+        <Style Selector="TextBlock.field-label">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#A09D97"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#DDDAD4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#1C1C1C"/>
+        </Style>
+
+        <Style Selector="Button.browse">
+            <Setter Property="Background" Value="#EDEAE3"/>
+            <Setter Property="Foreground" Value="#3A3835"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.browse:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#DEDBD3"/>
+        </Style>
+
+        <Style Selector="Button.chip-add">
+            <Setter Property="Background" Value="#EDEAE3"/>
+            <Setter Property="Foreground" Value="#3A3835"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.chip-add:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#DEDBD3"/>
+        </Style>
+
+        <Style Selector="Button.chip-remove">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="2,0"/>
+        </Style>
+        <Style Selector="Button.chip-remove:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#1C1C1C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#333333"/>
+        </Style>
+
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#EDEAE3"/>
+            <Setter Property="Foreground" Value="#1C1C1C"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="Button.secondary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#DEDBD3"/>
+        </Style>
+
+        <Style Selector="Button.back-link">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style Selector="Button.back-link:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+    </UserControl.Styles>
+
+    <ScrollViewer>
+        <Border Padding="36,32,48,36">
+            <StackPanel Spacing="0" MaxWidth="860" HorizontalAlignment="Left">
+
+                <!-- ── Breadcrumb ── -->
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,28">
+                    <Button Classes="back-link" Command="{Binding CancelCommand}">
+                        <TextBlock Text="&lt; Devices" FontSize="13" Foreground="#A09D97"/>
+                    </Button>
+                    <TextBlock Text="/"
+                               FontSize="13"
+                               Foreground="#C0BDB7"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Title}"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="#1C1C1C"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- ── Device name ── -->
+                <TextBlock Classes="field-label" Text="DEVICE NAME"/>
+                <TextBox Text="{Binding Name}"
+                         Watermark="e.g. Canon EOS R5"
+                         Margin="0,0,0,20"/>
+
+                <!-- ── Source + Backup folders ── -->
+                <Grid ColumnDefinitions="*,24,*" Margin="0,0,0,20">
+
+                    <StackPanel Grid.Column="0" Spacing="0">
+                        <TextBlock Classes="field-label" Text="SOURCE FOLDER"/>
+                        <Grid ColumnDefinitions="*,8,Auto">
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding SourceFolderPath}"
+                                     Watermark="/Volumes/Camera/DCIM"/>
+                            <Button Grid.Column="2"
+                                    Classes="browse"
+                                    Command="{Binding BrowseSourceCommand}">
+                                Browse
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Spacing="0">
+                        <TextBlock Classes="field-label" Text="BACKUP FOLDER"/>
+                        <Grid ColumnDefinitions="*,8,Auto">
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding BackupFolderPath}"
+                                     Watermark="~/Pictures/Backup"/>
+                            <Button Grid.Column="2"
+                                    Classes="browse"
+                                    Command="{Binding BrowseBackupCommand}">
+                                Browse
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+
+                </Grid>
+
+                <!-- ── Files/Load | Bot Token | Chat ID ── -->
+                <Grid ColumnDefinitions="140,24,*,24,180" Margin="0,0,0,20">
+
+                    <StackPanel Grid.Column="0" Spacing="0">
+                        <TextBlock Classes="field-label" Text="FILES / LOAD"/>
+                        <TextBox Text="{Binding FilesPerLoad}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Spacing="0">
+                        <TextBlock Classes="field-label" Text="TELEGRAM BOT TOKEN"/>
+                        <TextBox Text="{Binding TelegramBotToken}"
+                                 PasswordChar="•"
+                                 Watermark="1234567890:ABCDEFGHijklmn…"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="4" Spacing="0">
+                        <TextBlock Classes="field-label" Text="CHAT ID"/>
+                        <TextBox Text="{Binding TelegramChatId}"
+                                 Watermark="-1001234567890"/>
+                    </StackPanel>
+
+                </Grid>
+
+                <!-- ── Naming template ── -->
+                <Border Background="White"
+                        BorderBrush="#E8E5DF"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20,16"
+                        Margin="0,0,0,24">
+                    <StackPanel Spacing="12">
+
+                        <!-- Header row -->
+                        <Grid ColumnDefinitions="Auto,*">
+                            <TextBlock Text="NAMING TEMPLATE"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Foreground="#A09D97"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="Leave empty to keep original filenames"
+                                       FontSize="11"
+                                       Foreground="#C0BDB7"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Chip display -->
+                        <Border Background="#F7F6F3"
+                                BorderBrush="#DDDAD4"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="10,8"
+                                MinHeight="42">
+                            <ItemsControl ItemsSource="{Binding Chips}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,2,6,2"
+                                                CornerRadius="4"
+                                                Padding="8,3,4,3"
+                                                Background="#E8E5DF"
+                                                BorderBrush="#D5D2CB"
+                                                BorderThickness="1">
+                                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                                <TextBlock Text="{Binding Label}"
+                                                           FontSize="12"
+                                                           Foreground="#3A3835"
+                                                           VerticalAlignment="Center"/>
+                                                <Button Classes="chip-remove"
+                                                        Command="{Binding RemoveCommand}"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="×"
+                                                               FontSize="13"
+                                                               Foreground="#A09D97"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+
+                        <!-- Prefix input + add-token buttons -->
+                        <WrapPanel Orientation="Horizontal">
+                            <TextBox Text="{Binding PrefixInput}"
+                                     Watermark="Type prefix text…"
+                                     Width="180"
+                                     Margin="0,0,8,4"/>
+                            <Button Classes="chip-add"
+                                    Command="{Binding AddPrefixCommand}"
+                                    Margin="0,0,6,4">
+                                + Prefix
+                            </Button>
+                            <Button Classes="chip-add"
+                                    Command="{Binding AddSequenceNumberCommand}"
+                                    Margin="0,0,6,4">
+                                + Sequence #
+                            </Button>
+                            <Button Classes="chip-add"
+                                    Command="{Binding AddCurrentDateCommand}"
+                                    Margin="0,0,6,4">
+                                + Current Date
+                            </Button>
+                            <Button Classes="chip-add"
+                                    Command="{Binding AddPhotoDateCommand}"
+                                    Margin="0,0,0,4">
+                                + Photo Date
+                            </Button>
+                        </WrapPanel>
+
+                        <!-- Preview row -->
+                        <Border Background="#F0EDE8"
+                                CornerRadius="5"
+                                Padding="12,8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Preview →"
+                                           FontSize="12"
+                                           Foreground="#A09D97"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding NamingPreview}"
+                                           FontSize="12"
+                                           FontWeight="Medium"
+                                           Foreground="#3B82F6"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </Border>
+
+                <!-- ── Validation errors ── -->
+                <ItemsControl ItemsSource="{Binding Errors}"
+                              IsVisible="{Binding HasErrors}"
+                              Margin="0,0,0,16">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}"
+                                       FontSize="12"
+                                       Foreground="#DC2626"
+                                       Margin="0,2"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- ── Action buttons ── -->
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Spacing="10">
+                    <Button Classes="secondary" Command="{Binding CancelCommand}">Cancel</Button>
+                    <Button Classes="primary" Command="{Binding SaveCommand}">&#x2713; Save Device</Button>
+                </StackPanel>
+
+            </StackPanel>
+        </Border>
+    </ScrollViewer>
+
+</UserControl>

@@ -36,12 +36,15 @@ public sealed class DeviceListViewModel : ViewModelBase
         _ = LoadAsync();
     }
 
-    private async Task LoadAsync()
+    public async Task ReloadAsync()
     {
+        Devices.Clear();
         var profiles = await _getAllDevices.ExecuteAsync();
         foreach (var p in profiles)
             Devices.Add(CreateCard(p));
     }
+
+    private Task LoadAsync() => ReloadAsync();
 
     private DeviceCardViewModel CreateCard(DeviceProfile profile) => new(
         profile,
