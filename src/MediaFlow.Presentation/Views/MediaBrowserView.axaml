@@ -161,7 +161,9 @@
                 <StackPanel Grid.Column="0"
                             Orientation="Horizontal"
                             Spacing="4">
-                    <Button Classes="sort">Date ▾</Button>
+                    <Button Classes="sort"
+                            Command="{Binding ToggleSortCommand}"
+                            Content="{Binding SortLabel}"/>
 
                     <Rectangle Width="1" Fill="#DDDAD4" Margin="4,5"/>
 
