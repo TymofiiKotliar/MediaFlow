@@ -1,0 +1,430 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:MediaFlow.Presentation.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1020" d:DesignHeight="800"
+             x:Class="MediaFlow.Presentation.Views.MediaBrowserView"
+             Background="White">
+
+    <UserControl.Styles>
+
+        <!-- ── Filter toggle buttons (All / Images / Videos) ── -->
+        <Style Selector="Button.filter">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#DDDAD4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="12,5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#3A3835"/>
+        </Style>
+        <Style Selector="Button.filter:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#F5F3EF"/>
+        </Style>
+        <Style Selector="Button.filter.active">
+            <Setter Property="Background" Value="#E8E5DF"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+        <Style Selector="Button.filter.active:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#DEDBD3"/>
+        </Style>
+
+        <!-- ── Sort button (Date ▾) ── -->
+        <Style Selector="Button.sort">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#DDDAD4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#3A3835"/>
+        </Style>
+        <Style Selector="Button.sort:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#F5F3EF"/>
+        </Style>
+
+        <!-- ── Primary button (Run Pipeline) ── -->
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#1C1C1C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#333333"/>
+        </Style>
+
+        <!-- ── Secondary button (Apply to all) ── -->
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#EDEAE3"/>
+            <Setter Property="Foreground" Value="#1C1C1C"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="12,5"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.secondary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#DEDBD3"/>
+        </Style>
+
+        <!-- ── Ghost button (Load more →, Back link) ── -->
+        <Style Selector="Button.ghost">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#706E69"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="Button.ghost:pointerover">
+            <Setter Property="Foreground" Value="#1C1C1C"/>
+        </Style>
+
+        <!-- ── File row ── -->
+        <Style Selector="Border.file-row">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#F0EDE8"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        </Style>
+        <Style Selector="Border.file-row:pointerover">
+            <Setter Property="Background" Value="#FAFAF9"/>
+        </Style>
+        <!-- Row with any action set: dark left accent bar -->
+        <Style Selector="Border.file-row.has-actions">
+            <Setter Property="BorderBrush" Value="#1C1C1C"/>
+            <Setter Property="BorderThickness" Value="3,0,0,1"/>
+        </Style>
+        <Style Selector="Border.file-row.has-actions:pointerover">
+            <Setter Property="Background" Value="#F5F3EF"/>
+        </Style>
+
+    </UserControl.Styles>
+
+    <DockPanel>
+
+        <!-- ════════════════════════════════════════════
+             Header — breadcrumb + title + source path
+             ════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top"
+                Padding="24,14,24,14"
+                BorderBrush="#F0EDE8"
+                BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="*,Auto">
+
+                <StackPanel Grid.Column="0">
+                    <!-- Breadcrumb -->
+                    <StackPanel Orientation="Horizontal" Spacing="5" Margin="0,0,0,3">
+                        <TextBlock Text="Devices"
+                                   FontSize="12"
+                                   Foreground="#A09D97"/>
+                        <TextBlock Text="›"
+                                   FontSize="12"
+                                   Foreground="#C0BDB7"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding DeviceName}"
+                                   FontSize="12"
+                                   Foreground="#A09D97"/>
+                    </StackPanel>
+                    <!-- Title -->
+                    <TextBlock Text="Media Browser"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="#1C1C1C"/>
+                </StackPanel>
+
+                <!-- Source path (right-aligned, bottom-aligned with title) -->
+                <TextBlock Grid.Column="1"
+                           Text="{Binding SourcePath}"
+                           FontSize="12"
+                           Foreground="#A09D97"
+                           VerticalAlignment="Bottom"
+                           Margin="0,0,0,2"/>
+            </Grid>
+        </Border>
+
+        <!-- ════════════════════════════════════════════
+             Toolbar — sort / filter / apply / run
+             ════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top"
+                Padding="24,8,24,8"
+                BorderBrush="#F0EDE8"
+                BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="*,Auto">
+
+                <!-- Left group: sort + filters + apply -->
+                <StackPanel Grid.Column="0"
+                            Orientation="Horizontal"
+                            Spacing="4">
+                    <Button Classes="sort">Date ▾</Button>
+
+                    <Rectangle Width="1" Fill="#DDDAD4" Margin="4,5"/>
+
+                    <Button Classes="filter"
+                            Classes.active="{Binding IsFilterAll}"
+                            Command="{Binding ShowAllCommand}">All</Button>
+                    <Button Classes="filter"
+                            Classes.active="{Binding IsFilterImages}"
+                            Command="{Binding ShowImagesCommand}">Images</Button>
+                    <Button Classes="filter"
+                            Classes.active="{Binding IsFilterVideos}"
+                            Command="{Binding ShowVideosCommand}">Videos</Button>
+
+                    <Rectangle Width="1" Fill="#DDDAD4" Margin="4,5"/>
+
+                    <Button Classes="secondary"
+                            Command="{Binding ApplyToAllCommand}">Apply to all</Button>
+                </StackPanel>
+
+                <!-- Right: Run Pipeline -->
+                <Button Grid.Column="1"
+                        Classes="primary"
+                        Command="{Binding RunPipelineCommand}">
+                    ▶  Run Pipeline
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- ════════════════════════════════════════════
+             Column headers
+             ════════════════════════════════════════════ -->
+        <!--
+            Column layout (mirrored exactly in each file row below):
+            0: thumbnail 80px
+            1: gap       12px
+            2: file info *
+            3: rot-L     36px
+            4: rot-R     36px
+            5: flip      36px
+            6: separator 12px
+            7: BKP       48px
+            8: TG        48px
+            9: DEL       52px
+        -->
+        <Border DockPanel.Dock="Top"
+                Padding="24,0"
+                Background="#FAFAF9"
+                BorderBrush="#F0EDE8"
+                BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="80,12,*,36,36,36,12,48,48,52"
+                  Height="30">
+
+                <TextBlock Grid.Column="2"
+                           Text="FILE"
+                           FontSize="10"
+                           FontWeight="SemiBold"
+                           Foreground="#A09D97"
+                           VerticalAlignment="Center"/>
+
+                <!-- Rotation column icons -->
+                <TextBlock Grid.Column="3"
+                           Text="↺"
+                           FontSize="13"
+                           Foreground="#A09D97"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="4"
+                           Text="↻"
+                           FontSize="13"
+                           Foreground="#A09D97"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="5"
+                           Text="↕"
+                           FontSize="13"
+                           Foreground="#A09D97"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+
+                <!-- Separator -->
+                <Rectangle Grid.Column="6"
+                           Width="1"
+                           Fill="#E0DDD8"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Stretch"
+                           Margin="0,6"/>
+
+                <!-- Action column labels -->
+                <TextBlock Grid.Column="7"
+                           Text="BKP"
+                           FontSize="10"
+                           FontWeight="SemiBold"
+                           Foreground="#A09D97"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="8"
+                           Text="TG"
+                           FontSize="10"
+                           FontWeight="SemiBold"
+                           Foreground="#A09D97"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="9"
+                           Text="DEL"
+                           FontSize="10"
+                           FontWeight="SemiBold"
+                           Foreground="#DC2626"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- ════════════════════════════════════════════
+             Footer — status label + Load more
+             ════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Bottom"
+                Padding="24,9"
+                Background="#FAFAF9"
+                BorderBrush="#F0EDE8"
+                BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0"
+                           Text="{Binding StatusText}"
+                           FontSize="12"
+                           Foreground="#A09D97"
+                           VerticalAlignment="Center"/>
+                <Button Grid.Column="1"
+                        Classes="ghost"
+                        Command="{Binding LoadMoreCommand}"
+                        IsVisible="{Binding HasMore}">
+                    Load more →
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- ════════════════════════════════════════════
+             File list (main scrollable area)
+             ════════════════════════════════════════════ -->
+        <Grid>
+            <ScrollViewer>
+                <ItemsControl ItemsSource="{Binding FilteredFiles}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+
+                            <!-- One file row -->
+                            <Border Classes="file-row"
+                                    Classes.has-actions="{Binding HasAnyAction}">
+                                <Grid ColumnDefinitions="80,12,*,36,36,36,12,48,48,52"
+                                      Margin="24,0"
+                                      Height="72">
+
+                                    <!-- Thumbnail / placeholder -->
+                                    <Border Grid.Column="0"
+                                            Width="80" Height="56"
+                                            CornerRadius="4"
+                                            ClipToBounds="True"
+                                            VerticalAlignment="Center">
+                                        <Grid>
+                                            <!-- Always-visible gray bg -->
+                                            <Rectangle Fill="#D8D5CE"/>
+                                            <!-- Actual bitmap once loaded -->
+                                            <Image Source="{Binding Thumbnail}"
+                                                   IsVisible="{Binding HasThumbnail}"
+                                                   Stretch="UniformToFill"/>
+                                            <!-- Extension label while pending -->
+                                            <TextBlock Text="{Binding FileExtension}"
+                                                       IsVisible="{Binding !HasThumbnail}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="10"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#A09D97"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- File name + meta -->
+                                    <StackPanel Grid.Column="2"
+                                                VerticalAlignment="Center"
+                                                Spacing="4">
+                                        <TextBlock Text="{Binding FileName}"
+                                                   FontSize="13"
+                                                   FontWeight="Medium"
+                                                   Foreground="#1C1C1C"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding MetaText}"
+                                                   FontSize="11"
+                                                   Foreground="#A09D97"/>
+                                    </StackPanel>
+
+                                    <!-- Rotate Left -->
+                                    <CheckBox Grid.Column="3"
+                                              IsChecked="{Binding ShouldRotateLeft, Mode=TwoWay}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+
+                                    <!-- Rotate Right -->
+                                    <CheckBox Grid.Column="4"
+                                              IsChecked="{Binding ShouldRotateRight, Mode=TwoWay}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+
+                                    <!-- Flip 180° -->
+                                    <CheckBox Grid.Column="5"
+                                              IsChecked="{Binding ShouldFlip, Mode=TwoWay}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+
+                                    <!-- Column separator -->
+                                    <Rectangle Grid.Column="6"
+                                               Width="1"
+                                               Fill="#E8E5DF"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Stretch"
+                                               Margin="0,14"/>
+
+                                    <!-- Backup -->
+                                    <CheckBox Grid.Column="7"
+                                              IsChecked="{Binding ShouldBackup, Mode=TwoWay}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+
+                                    <!-- Telegram -->
+                                    <CheckBox Grid.Column="8"
+                                              IsChecked="{Binding ShouldSendToTelegram, Mode=TwoWay}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+
+                                    <!-- Delete -->
+                                    <CheckBox Grid.Column="9"
+                                              IsChecked="{Binding ShouldDelete, Mode=TwoWay}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+
+                                </Grid>
+                            </Border>
+
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- Loading banner (overlays top of list while fetching) -->
+            <Border IsVisible="{Binding IsLoading}"
+                    VerticalAlignment="Top"
+                    Background="#F5F3EF"
+                    Padding="24,9">
+                <TextBlock Text="Loading files…"
+                           FontSize="12"
+                           Foreground="#706E69"/>
+            </Border>
+
+            <!-- Source-not-accessible error -->
+            <Border IsVisible="{Binding HasLoadError}"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Padding="24,16">
+                <TextBlock Text="{Binding LoadError}"
+                           FontSize="13"
+                           Foreground="#DC2626"
+                           TextAlignment="Center"/>
+            </Border>
+
+        </Grid>
+
+    </DockPanel>
+</UserControl>

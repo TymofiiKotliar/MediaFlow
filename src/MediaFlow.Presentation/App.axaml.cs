@@ -21,6 +21,7 @@ public partial class App : Avalonia.Application
         services.AddMediaFlowServices();
         services.AddTransient<DeviceListViewModel>();
         services.AddTransient<ProfileEditorViewModel>();
+        services.AddTransient<MediaBrowserViewModel>();
         services.AddTransient<MainWindowViewModel>();
         services.AddTransient<MainWindow>();
         Services = services.BuildServiceProvider();
