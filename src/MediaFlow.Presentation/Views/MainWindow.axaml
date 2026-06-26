@@ -20,7 +20,13 @@
             <DockPanel>
 
                 <!-- Logo -->
-                <Border DockPanel.Dock="Top" Padding="14,18,14,14">
+                <Button DockPanel.Dock="Top"
+                        Command="{Binding NavigateToDeviceListCommand}"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Padding="14,18,14,14"
+                        Cursor="Hand"
+                        HorizontalContentAlignment="Left">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <!-- Camera icon -->
                         <Border Background="#1C1C1C" CornerRadius="5"
@@ -42,7 +48,7 @@
                                    Foreground="#1C1C1C"
                                    VerticalAlignment="Center"/>
                     </StackPanel>
-                </Border>
+                </Button>
 
                 <!-- Version -->
                 <TextBlock DockPanel.Dock="Bottom"
@@ -53,31 +59,38 @@
 
                 <!-- Nav items -->
                 <StackPanel Margin="8,4,8,0">
-                    <Border Background="#DEDAD1"
-                            CornerRadius="5"
-                            Padding="10,8">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <!-- 2×2 grid icon -->
-                            <Canvas Width="13" Height="13" VerticalAlignment="Center">
-                                <Rectangle Canvas.Left="0" Canvas.Top="0"
-                                           Width="5" Height="5"
-                                           Fill="#3A3835" RadiusX="1" RadiusY="1"/>
-                                <Rectangle Canvas.Left="7" Canvas.Top="0"
-                                           Width="5" Height="5"
-                                           Fill="#3A3835" RadiusX="1" RadiusY="1"/>
-                                <Rectangle Canvas.Left="0" Canvas.Top="7"
-                                           Width="5" Height="5"
-                                           Fill="#3A3835" RadiusX="1" RadiusY="1"/>
-                                <Rectangle Canvas.Left="7" Canvas.Top="7"
-                                           Width="5" Height="5"
-                                           Fill="#3A3835" RadiusX="1" RadiusY="1"/>
-                            </Canvas>
-                            <TextBlock Text="Devices"
-                                       FontSize="13"
-                                       Foreground="#1C1C1C"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Border>
+                    <Button Command="{Binding NavigateToDeviceListCommand}"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Padding="0"
+                            Cursor="Hand"
+                            HorizontalContentAlignment="Stretch">
+                        <Border Background="#DEDAD1"
+                                CornerRadius="5"
+                                Padding="10,8">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <!-- 2×2 grid icon -->
+                                <Canvas Width="13" Height="13" VerticalAlignment="Center">
+                                    <Rectangle Canvas.Left="0" Canvas.Top="0"
+                                               Width="5" Height="5"
+                                               Fill="#3A3835" RadiusX="1" RadiusY="1"/>
+                                    <Rectangle Canvas.Left="7" Canvas.Top="0"
+                                               Width="5" Height="5"
+                                               Fill="#3A3835" RadiusX="1" RadiusY="1"/>
+                                    <Rectangle Canvas.Left="0" Canvas.Top="7"
+                                               Width="5" Height="5"
+                                               Fill="#3A3835" RadiusX="1" RadiusY="1"/>
+                                    <Rectangle Canvas.Left="7" Canvas.Top="7"
+                                               Width="5" Height="5"
+                                               Fill="#3A3835" RadiusX="1" RadiusY="1"/>
+                                </Canvas>
+                                <TextBlock Text="Devices"
+                                           FontSize="13"
+                                           Foreground="#1C1C1C"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </Button>
                 </StackPanel>
 
             </DockPanel>

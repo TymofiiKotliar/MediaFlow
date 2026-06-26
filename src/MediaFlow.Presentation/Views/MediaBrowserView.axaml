@@ -120,9 +120,10 @@
                 <StackPanel Grid.Column="0">
                     <!-- Breadcrumb -->
                     <StackPanel Orientation="Horizontal" Spacing="5" Margin="0,0,0,3">
-                        <TextBlock Text="Devices"
-                                   FontSize="12"
-                                   Foreground="#A09D97"/>
+                        <Button Classes="ghost"
+                                Command="{Binding BackCommand}"
+                                FontSize="12"
+                                Cursor="Hand">Devices</Button>
                         <TextBlock Text="›"
                                    FontSize="12"
                                    Foreground="#C0BDB7"

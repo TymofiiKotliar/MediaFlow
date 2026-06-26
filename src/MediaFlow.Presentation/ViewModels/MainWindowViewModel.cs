@@ -1,3 +1,4 @@
+using System.Reactive;
 using MediaFlow.Domain.Entities;
 using ReactiveUI;
 
@@ -34,6 +35,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         mediaBrowser.BackRequested += NavigateToDeviceList;
 
+        NavigateToDeviceListCommand = ReactiveCommand.Create(NavigateToDeviceList);
+
         NavigateTo(deviceList);
     }
 
@@ -54,6 +57,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         NavigateToDeviceList();
         _ = _deviceList.ReloadAsync();
     }
+
+    public ReactiveCommand<Unit, Unit> NavigateToDeviceListCommand { get; }
 
     public void NavigateTo(ViewModelBase page) => CurrentPage = page;
     public void NavigateToDeviceList() => NavigateTo(_deviceList);
