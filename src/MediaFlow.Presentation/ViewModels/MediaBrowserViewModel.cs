@@ -16,7 +16,7 @@ namespace MediaFlow.Presentation.ViewModels;
 public sealed class MediaBrowserViewModel : ViewModelBase
 {
     private enum FilterMode { All, Images, Videos }
-    private enum SortMode  { DateDesc, DateAsc }
+    private enum SortMode  { Desc, Asc, None }
 
     private readonly LoadMediaUseCase _loadMedia;
     private readonly IThumbnailService _thumbnails;
@@ -27,7 +27,9 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     private string? _loadError;
     private int _offset;
     private FilterMode _filterMode = FilterMode.All;
-    private SortMode   _sortMode   = SortMode.DateDesc;
+    private SortMode   _sortModeDate   = SortMode.Desc;
+    private SortMode   _sortModeName   = SortMode.Desc;
+    private SortMode   _sortModeSize   = SortMode.Desc;
     private CancellationTokenSource _cts = new();
 
     // Raw list — all loaded files regardless of filter
@@ -72,7 +74,9 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     public bool IsFilterImages => _filterMode == FilterMode.Images;
     public bool IsFilterVideos => _filterMode == FilterMode.Videos;
 
-    public string SortLabel => _sortMode == SortMode.DateDesc ? "Date ▾" : "Date ▴";
+    public string SortLabelDate => _sortModeDate switch { SortMode.Desc => "Date ▾", SortMode.Asc => "Date ▴", _ => "Date -" };
+    public string SortLabelName => _sortModeName switch { SortMode.Desc => "Name ▾", SortMode.Asc => "Name ▴", _ => "Name -" };
+    public string SortLabelSize => _sortModeSize switch { SortMode.Desc => "Size ▾", SortMode.Asc => "Size ▴", _ => "Size -" };
 
     public ReactiveCommand<Unit, Unit> LoadMoreCommand    { get; }
     public ReactiveCommand<Unit, Unit> BackCommand        { get; }
@@ -81,7 +85,9 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ShowVideosCommand  { get; }
     public ReactiveCommand<Unit, Unit> ApplyToAllCommand  { get; }
     public ReactiveCommand<Unit, Unit> RunPipelineCommand { get; }
-    public ReactiveCommand<Unit, Unit> ToggleSortCommand  { get; }
+    public ReactiveCommand<Unit, Unit> ToggleSortDateCommand  { get; }
+    public ReactiveCommand<Unit, Unit> ToggleSortNameCommand  { get; }
+    public ReactiveCommand<Unit, Unit> ToggleSortSizeCommand  { get; }
 
     public event Action? BackRequested;
 
@@ -104,7 +110,9 @@ public sealed class MediaBrowserViewModel : ViewModelBase
         ShowVideosCommand  = ReactiveCommand.Create(() => SetFilter(FilterMode.Videos));
         ApplyToAllCommand  = ReactiveCommand.Create(() => { }); // Phase 5
         RunPipelineCommand = ReactiveCommand.Create(() => { }); // Phase 5
-        ToggleSortCommand  = ReactiveCommand.Create(ToggleSort);
+        ToggleSortDateCommand  = ReactiveCommand.Create(ToggleSortDate);
+        ToggleSortNameCommand  = ReactiveCommand.Create(ToggleSortName);
+        ToggleSortSizeCommand  = ReactiveCommand.Create(ToggleSortSize);
     }
 
     public void Initialize(DeviceProfile device)
@@ -146,11 +154,32 @@ public sealed class MediaBrowserViewModel : ViewModelBase
         }
     }
 
-    private void ToggleSort()
+    private static SortMode NextSortMode(SortMode current) => current switch
     {
-        _sortMode = _sortMode == SortMode.DateDesc ? SortMode.DateAsc : SortMode.DateDesc;
-        this.RaisePropertyChanged(nameof(SortLabel));
-        RebuildFilteredFiles();
+        SortMode.Desc => SortMode.Asc,
+        SortMode.Asc  => SortMode.None,
+        _             => SortMode.Desc
+    };
+
+    private void ToggleSortDate()
+    {
+        _sortModeDate = NextSortMode(_sortModeDate);
+        this.RaisePropertyChanged(nameof(SortLabelDate));
+        ApplySortTo(FilteredFiles.ToList());
+    }
+
+    private void ToggleSortName()
+    {
+        _sortModeName = NextSortMode(_sortModeName);
+        this.RaisePropertyChanged(nameof(SortLabelName));
+        ApplySortTo(FilteredFiles.ToList());
+    }
+
+    private void ToggleSortSize()
+    {
+        _sortModeSize = NextSortMode(_sortModeSize);
+        this.RaisePropertyChanged(nameof(SortLabelSize));
+        ApplySortTo(FilteredFiles.ToList());
     }
 
     private void SetFilter(FilterMode mode)
@@ -160,7 +189,7 @@ public sealed class MediaBrowserViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(IsFilterAll));
         this.RaisePropertyChanged(nameof(IsFilterImages));
         this.RaisePropertyChanged(nameof(IsFilterVideos));
-        RebuildFilteredFiles();
+        ApplySortTo(Files.Where(MatchesFilter));
     }
 
     private bool MatchesFilter(FileRowViewModel row) => _filterMode switch
@@ -180,18 +209,35 @@ public sealed class MediaBrowserViewModel : ViewModelBase
         return DateTime.MaxValue;
     }
 
-    private void RebuildFilteredFiles()
+    private void ApplySortTo(IEnumerable<FileRowViewModel> source)
     {
-        var sorted = _sortMode == SortMode.DateDesc
-            ? Files.Where(MatchesFilter)
-                   .OrderByDescending(f => ParseExifDate(f.Context.ExifCaptureDate))
-                   .ThenBy(f => f.FileName)
-            : Files.Where(MatchesFilter)
-                   .OrderBy(f => ParseExifDate(f.Context.ExifCaptureDate))
-                   .ThenBy(f => f.FileName);
+        IOrderedEnumerable<FileRowViewModel>? sorted = null;
+
+        if (_sortModeDate != SortMode.None)
+            sorted = _sortModeDate == SortMode.Desc
+                ? source.OrderByDescending(f => ParseExifDate(f.Context.ExifCaptureDate))
+                : source.OrderBy(f => ParseExifDate(f.Context.ExifCaptureDate));
+
+        if (_sortModeName != SortMode.None)
+            sorted = sorted is null
+                ? (_sortModeName == SortMode.Desc
+                    ? source.OrderByDescending(f => f.FileName)
+                    : source.OrderBy(f => f.FileName))
+                : (_sortModeName == SortMode.Desc
+                    ? sorted.ThenByDescending(f => f.FileName)
+                    : sorted.ThenBy(f => f.FileName));
+
+        if (_sortModeSize != SortMode.None)
+            sorted = sorted is null
+                ? (_sortModeSize == SortMode.Desc
+                    ? source.OrderByDescending(f => f.FileSize)
+                    : source.OrderBy(f => f.FileSize))
+                : (_sortModeSize == SortMode.Desc
+                    ? sorted.ThenByDescending(f => f.FileSize)
+                    : sorted.ThenBy(f => f.FileSize));
 
         FilteredFiles.Clear();
-        foreach (var f in sorted)
+        foreach (var f in sorted ?? source)
             FilteredFiles.Add(f);
     }
 

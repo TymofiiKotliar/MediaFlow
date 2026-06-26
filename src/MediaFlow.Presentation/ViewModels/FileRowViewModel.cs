@@ -23,6 +23,7 @@ public sealed class FileRowViewModel : ViewModelBase
 
     public FileContext Context { get; }
     public string FileName { get; }
+    public long FileSize { get; }
     public string FileSizeText { get; }
     public string CaptureDate { get; }
     public string MetaText { get; }
@@ -95,7 +96,8 @@ public sealed class FileRowViewModel : ViewModelBase
         FileExtension = Path.GetExtension(context.OriginalName).TrimStart('.').ToUpperInvariant();
 
         var info = new FileInfo(context.SourcePath);
-        FileSizeText = FormatSize(info.Exists ? info.Length : 0);
+        FileSize = info.Exists ? info.Length : 0;
+        FileSizeText = FormatSize(FileSize);
         CaptureDate = context.ExifCaptureDate is not null
             ? FormatExifDate(context.ExifCaptureDate)
             : "";

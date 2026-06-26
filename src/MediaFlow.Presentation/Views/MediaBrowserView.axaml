@@ -162,8 +162,14 @@
                             Orientation="Horizontal"
                             Spacing="4">
                     <Button Classes="sort"
-                            Command="{Binding ToggleSortCommand}"
-                            Content="{Binding SortLabel}"/>
+                            Command="{Binding ToggleSortDateCommand}"
+                            Content="{Binding SortLabelDate}"/>
+                    <Button Classes="sort"
+                            Command="{Binding ToggleSortNameCommand}"
+                            Content="{Binding SortLabelName}"/>
+                    <Button Classes="sort"
+                            Command="{Binding ToggleSortSizeCommand}"
+                            Content="{Binding SortLabelSize}"/>
 
                     <Rectangle Width="1" Fill="#DDDAD4" Margin="4,5"/>
 
