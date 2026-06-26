@@ -1,6 +1,8 @@
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
@@ -40,6 +42,8 @@ public sealed class FileRowViewModel : ViewModelBase
     }
 
     public bool HasThumbnail => _thumbnail is not null;
+
+    public ReactiveCommand<Unit, Unit> OpenFileCommand { get; }
 
     public bool ShouldRotateLeft
     {
@@ -105,10 +109,15 @@ public sealed class FileRowViewModel : ViewModelBase
             ? $"{FileSizeText} · {CaptureDate}"
             : FileSizeText;
 
+        OpenFileCommand = ReactiveCommand.Create(OpenFile);
+
         _ = LoadThumbnailAsync(thumbnails, ct);
     }
 
     private void NotifyActions() => this.RaisePropertyChanged(nameof(HasAnyAction));
+
+    private void OpenFile() =>
+        Process.Start(new ProcessStartInfo(Context.TempPath) { UseShellExecute = true });
 
     private async Task LoadThumbnailAsync(IThumbnailService thumbnails, CancellationToken ct)
     {

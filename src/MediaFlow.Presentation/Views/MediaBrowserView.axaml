@@ -321,29 +321,36 @@
                                       Margin="24,0"
                                       Height="72">
 
-                                    <!-- Thumbnail / placeholder -->
-                                    <Border Grid.Column="0"
+                                    <!-- Thumbnail / placeholder — click opens file in system viewer -->
+                                    <Button Grid.Column="0"
+                                            Command="{Binding OpenFileCommand}"
                                             Width="80" Height="56"
-                                            CornerRadius="4"
-                                            ClipToBounds="True"
-                                            VerticalAlignment="Center">
-                                        <Grid>
-                                            <!-- Always-visible gray bg -->
-                                            <Rectangle Fill="#D8D5CE"/>
-                                            <!-- Actual bitmap once loaded -->
-                                            <Image Source="{Binding Thumbnail}"
-                                                   IsVisible="{Binding HasThumbnail}"
-                                                   Stretch="UniformToFill"/>
-                                            <!-- Extension label while pending -->
-                                            <TextBlock Text="{Binding FileExtension}"
-                                                       IsVisible="{Binding !HasThumbnail}"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"
-                                                       FontSize="10"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="#A09D97"/>
-                                        </Grid>
-                                    </Border>
+                                            Padding="0"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            VerticalAlignment="Center"
+                                            Cursor="Hand">
+                                        <Border CornerRadius="4"
+                                                ClipToBounds="True"
+                                                Width="80" Height="56">
+                                            <Grid>
+                                                <!-- Always-visible gray bg -->
+                                                <Rectangle Fill="#D8D5CE"/>
+                                                <!-- Actual bitmap once loaded -->
+                                                <Image Source="{Binding Thumbnail}"
+                                                       IsVisible="{Binding HasThumbnail}"
+                                                       Stretch="UniformToFill"/>
+                                                <!-- Extension label while pending -->
+                                                <TextBlock Text="{Binding FileExtension}"
+                                                           IsVisible="{Binding !HasThumbnail}"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           FontSize="10"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="#A09D97"/>
+                                            </Grid>
+                                        </Border>
+                                    </Button>
 
                                     <!-- File name + meta -->
                                     <StackPanel Grid.Column="2"
