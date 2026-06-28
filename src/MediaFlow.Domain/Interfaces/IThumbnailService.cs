@@ -1,4 +1,4 @@
-namespace MediaFlow.Infrastructure.Processing;
+namespace MediaFlow.Domain.Interfaces;
 
 public interface IThumbnailService
 {

@@ -1,0 +1,231 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:MediaFlow.Presentation.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1020" d:DesignHeight="800"
+             x:Class="MediaFlow.Presentation.Views.DeviceListView"
+             Background="White">
+
+    <UserControl.Styles>
+        <Style Selector="Ellipse.status-ok">
+            <Setter Property="Fill" Value="#22C55E"/>
+        </Style>
+        <Style Selector="Ellipse.status-err">
+            <Setter Property="Fill" Value="#EF4444"/>
+        </Style>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#1C1C1C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#333333"/>
+        </Style>
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#EDEAE3"/>
+            <Setter Property="Foreground" Value="#1C1C1C"/>
+            <Setter Property="CornerRadius" Value="5"/>
+        </Style>
+        <Style Selector="Button.secondary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#DEDBD3"/>
+        </Style>
+        <Style Selector="Button.danger">
+            <Setter Property="Background" Value="#FEE2E2"/>
+            <Setter Property="CornerRadius" Value="5"/>
+        </Style>
+        <Style Selector="Button.danger:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#FECACA"/>
+        </Style>
+        <Style Selector="Button.add-btn">
+            <Setter Property="Background" Value="#1C1C1C"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,10"/>
+        </Style>
+        <Style Selector="Button.add-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#333333"/>
+        </Style>
+    </UserControl.Styles>
+
+    <DockPanel>
+
+        <!-- ── Header ── -->
+        <Border DockPanel.Dock="Top"
+                Padding="36,28,36,22"
+                BorderBrush="#F0EDE8"
+                BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Text="Devices"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Foreground="#1C1C1C"/>
+                    <TextBlock Text="{Binding DeviceCountText}"
+                               FontSize="13"
+                               Foreground="#A09D97"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Classes="add-btn"
+                        Command="{Binding AddDeviceCommand}"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="+ Add Device" FontSize="13" FontWeight="Medium"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- ── Card grid ── -->
+        <ScrollViewer Padding="28,16,28,28">
+            <ItemsControl ItemsSource="{Binding Devices}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+
+                        <!-- Card -->
+                        <Border Width="330"
+                                Margin="8,8"
+                                CornerRadius="8"
+                                Background="#F5F3EF"
+                                BorderBrush="#E8E5DF"
+                                BorderThickness="1"
+                                ClipToBounds="True">
+                            <StackPanel>
+
+                                <!-- Thumbnail area (hatched placeholder) -->
+                                <Grid Height="170">
+                                    <Rectangle Fill="#E2DFD8"/>
+
+                                    <!-- Camera icon -->
+                                    <Canvas Width="40" Height="30"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                        <Rectangle Canvas.Left="0" Canvas.Top="5"
+                                                   Width="28" Height="20"
+                                                   Fill="#BCBAB1" RadiusX="3" RadiusY="3"/>
+                                        <Ellipse Canvas.Left="8" Canvas.Top="9"
+                                                 Width="12" Height="12"
+                                                 Fill="#A6A49C"/>
+                                        <Ellipse Canvas.Left="10.5" Canvas.Top="11.5"
+                                                 Width="7" Height="7"
+                                                 Fill="#E2DFD8"/>
+                                        <Polygon Canvas.Left="0" Canvas.Top="0"
+                                                 Points="28,5 40,10 40,20 28,25"
+                                                 Fill="#BCBAB1"/>
+                                    </Canvas>
+
+                                    <!-- Source status dot (green = accessible, red = not) -->
+                                    <Ellipse Width="10" Height="10"
+                                             HorizontalAlignment="Left"
+                                             VerticalAlignment="Bottom"
+                                             Margin="12,0,0,10"
+                                             Classes.status-ok="{Binding IsSourceAccessible}"
+                                             Classes.status-err="{Binding !IsSourceAccessible}"/>
+                                </Grid>
+
+                                <!-- Card body -->
+                                <Border Padding="14,12,14,14">
+                                    <StackPanel>
+
+                                        <!-- Device name -->
+                                        <TextBlock Text="{Binding Profile.Name}"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="15"
+                                                   Foreground="#1C1C1C"
+                                                   Margin="0,0,0,8"/>
+
+                                        <!-- Files/load chip -->
+                                        <Border Background="#E8E5DF"
+                                                CornerRadius="4"
+                                                Padding="8,3"
+                                                HorizontalAlignment="Left"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="{Binding FilesPerLoadText}"
+                                                       FontSize="11"
+                                                       Foreground="#706E69"/>
+                                        </Border>
+
+                                        <!-- SOURCE -->
+                                        <TextBlock Text="SOURCE"
+                                                   FontSize="10"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#A09D97"
+                                                   Margin="0,0,0,2"/>
+                                        <TextBlock Text="{Binding Profile.SourceFolderPath}"
+                                                   FontSize="12"
+                                                   Foreground="#3B82F6"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Margin="0,0,0,10"/>
+
+                                        <!-- BACKUP -->
+                                        <TextBlock Text="BACKUP"
+                                                   FontSize="10"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#A09D97"
+                                                   Margin="0,0,0,2"/>
+                                        <TextBlock Text="{Binding Profile.BackupFolderPath}"
+                                                   FontSize="12"
+                                                   Foreground="#3B82F6"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Margin="0,0,0,16"/>
+
+                                        <!-- Action buttons -->
+                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                                            <Button Grid.Column="0"
+                                                    Classes="primary"
+                                                    Command="{Binding OpenCommand}"
+                                                    HorizontalAlignment="Stretch"
+                                                    Padding="0,9">
+                                                <TextBlock Text="Open" FontSize="13"/>
+                                            </Button>
+                                            <Button Grid.Column="1"
+                                                    Classes="secondary"
+                                                    Command="{Binding EditCommand}"
+                                                    Padding="14,9">
+                                                <TextBlock Text="Edit" FontSize="13"/>
+                                            </Button>
+                                            <Button Grid.Column="2"
+                                                    Classes="danger"
+                                                    Command="{Binding DeleteCommand}"
+                                                    Padding="10,9">
+                                                <!-- Trash icon -->
+                                                <Canvas Width="13" Height="14">
+                                                    <Rectangle Canvas.Left="1" Canvas.Top="3"
+                                                               Width="11" Height="10"
+                                                               RadiusX="1" RadiusY="1"
+                                                               Fill="#DC2626"/>
+                                                    <Rectangle Canvas.Left="0" Canvas.Top="2"
+                                                               Width="13" Height="2"
+                                                               Fill="#DC2626"/>
+                                                    <Rectangle Canvas.Left="4" Canvas.Top="0"
+                                                               Width="5" Height="3"
+                                                               RadiusX="1" RadiusY="1"
+                                                               Fill="#DC2626"/>
+                                                    <Rectangle Canvas.Left="4.5" Canvas.Top="5"
+                                                               Width="1.5" Height="5"
+                                                               Fill="White"/>
+                                                    <Rectangle Canvas.Left="7.5" Canvas.Top="5"
+                                                               Width="1.5" Height="5"
+                                                               Fill="White"/>
+                                                </Canvas>
+                                            </Button>
+                                        </Grid>
+
+                                    </StackPanel>
+                                </Border>
+
+                            </StackPanel>
+                        </Border>
+
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+    </DockPanel>
+</UserControl>

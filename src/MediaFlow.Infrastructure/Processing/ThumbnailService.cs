@@ -1,4 +1,5 @@
 using FFMpegCore;
+using MediaFlow.Domain.Interfaces;
 
 namespace MediaFlow.Infrastructure.Processing;
 

@@ -43,6 +43,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IMediaLoader>(sp => new MediaLoaderAdapter(
             sp.GetRequiredService<FileSystemAdapter>(),
             sp.GetRequiredService<MetadataAdapter>(),
+            sp.GetRequiredService<IRotationStage>(),
             AppPaths.TempFolder));
 
         // ── Naming token resolvers (all registered; injected as IEnumerable<>) ──

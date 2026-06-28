@@ -20,7 +20,8 @@ public sealed class RotationStageAdapter : IRotationStage
             return (context, new Skipped("No rotation action assigned"));
 
         var inputPath = context.File.TempPath;
-        var outputPath = inputPath + ".processing";
+        var ext = Path.GetExtension(inputPath);
+        var outputPath = inputPath[..^ext.Length] + ".processing" + ext;
 
         try
         {

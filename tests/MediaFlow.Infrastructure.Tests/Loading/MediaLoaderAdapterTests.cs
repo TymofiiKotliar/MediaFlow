@@ -1,8 +1,10 @@
 using FluentAssertions;
 using MediaFlow.Domain.Enums;
+using MediaFlow.Domain.Interfaces;
 using MediaFlow.Infrastructure.FileSystem;
 using MediaFlow.Infrastructure.Loading;
 using MediaFlow.Infrastructure.Metadata;
+using NSubstitute;
 
 namespace MediaFlow.Infrastructure.Tests.Loading;
 
@@ -19,7 +21,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         Directory.CreateDirectory(_sourceDir);
         Directory.CreateDirectory(_tempDir);
-        _sut = new MediaLoaderAdapter(new FileSystemAdapter(), new MetadataAdapter(), _tempDir);
+        _sut = new MediaLoaderAdapter(new FileSystemAdapter(), new MetadataAdapter(), Substitute.For<IRotationStage>(), _tempDir);
     }
 
     public void Dispose()
