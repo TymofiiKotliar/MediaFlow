@@ -86,6 +86,23 @@
             <Setter Property="Foreground" Value="#1C1C1C"/>
         </Style>
 
+        <!-- ── Danger text (failed count in summary) ── -->
+        <Style Selector="TextBlock.danger">
+            <Setter Property="Foreground" Value="#DC2626"/>
+        </Style>
+
+        <!-- ── Stage pills inside the progress overlay ── -->
+        <Style Selector="Border.stage-pill">
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Background" Value="#F0EDE8"/>
+            <Setter Property="Margin" Value="0,0,6,6"/>
+        </Style>
+        <Style Selector="Border.stage-pill-danger">
+            <Setter Property="Background" Value="#FEE2E2"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
         <!-- ── File row ── -->
         <Style Selector="Border.file-row">
             <Setter Property="Background" Value="White"/>
@@ -106,6 +123,7 @@
 
     </UserControl.Styles>
 
+    <Grid>
     <DockPanel>
 
         <!-- ════════════════════════════════════════════
@@ -120,10 +138,9 @@
                 <StackPanel Grid.Column="0">
                     <!-- Breadcrumb -->
                     <StackPanel Orientation="Horizontal" Spacing="5" Margin="0,0,0,3">
-                        <Button Classes="ghost"
-                                Command="{Binding BackCommand}"
-                                FontSize="12"
-                                Cursor="Hand">Devices</Button>
+                        <TextBlock Text="Devices"
+                                   FontSize="12"
+                                   Foreground="#A09D97"/>
                         <TextBlock Text="›"
                                    FontSize="12"
                                    Foreground="#C0BDB7"
@@ -443,4 +460,231 @@
         </Grid>
 
     </DockPanel>
+
+    <!-- ════════════════════════════════════════════
+         Progress overlay — shown while pipeline runs
+         ════════════════════════════════════════════ -->
+    <Border IsVisible="{Binding IsPipelineRunning}"
+            Background="#99000000">
+        <Border Background="#EDECEA"
+                CornerRadius="10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Width="460"
+                BoxShadow="0 8 40 0 #33000000">
+            <StackPanel Margin="28,24">
+
+                <!-- Title row -->
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,2">
+                    <TextBlock Grid.Column="0"
+                               Text="Running pipeline..."
+                               FontSize="17"
+                               FontWeight="Bold"
+                               Foreground="#1C1C1C"
+                               VerticalAlignment="Center"/>
+                    <Button Grid.Column="1"
+                            Command="{Binding CancelPipelineCommand}"
+                            Width="26" Height="26"
+                            Padding="0"
+                            Background="#DDDAD4"
+                            BorderThickness="0"
+                            CornerRadius="5"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            FontSize="12"
+                            Foreground="#706E69">✕</Button>
+                </Grid>
+
+                <!-- Device name · file count -->
+                <TextBlock Text="{Binding PipelineSubtitle}"
+                           FontSize="12"
+                           Foreground="#A09D97"
+                           Margin="0,0,0,20"/>
+
+                <!-- CURRENT FILE section -->
+                <TextBlock Text="CURRENT FILE"
+                           FontSize="10"
+                           FontWeight="SemiBold"
+                           Foreground="#A09D97"
+                           Margin="0,0,0,4"/>
+                <TextBlock Text="{Binding CurrentFileName}"
+                           FontSize="14"
+                           FontWeight="Medium"
+                           Foreground="#1C1C1C"
+                           TextTrimming="CharacterEllipsis"
+                           Margin="0,0,0,16"/>
+
+                <!-- Progress bar -->
+                <ProgressBar Value="{Binding ProgressPercent}"
+                             Minimum="0" Maximum="100"
+                             Height="6"
+                             CornerRadius="3"
+                             Foreground="#1C1C1C"
+                             Background="#E0DDD8"
+                             Margin="0,0,0,5"/>
+
+                <!-- N of M · percentage -->
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,18">
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding ProgressText}"
+                               FontSize="11"
+                               Foreground="#A09D97"/>
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding ProgressPercentText}"
+                               FontSize="11"
+                               Foreground="#A09D97"/>
+                </Grid>
+
+                <!-- Stage pills -->
+                <WrapPanel Orientation="Horizontal" Margin="0,0,0,24">
+                    <Border Classes="stage-pill"
+                            IsVisible="{Binding CurrentFileIsVideo}">
+                        <TextBlock Text="Convert" FontSize="11" Foreground="#706E69"/>
+                    </Border>
+                    <Border Classes="stage-pill"
+                            IsVisible="{Binding CurrentFileHasRotation}">
+                        <TextBlock Text="Rotate" FontSize="11" Foreground="#706E69"/>
+                    </Border>
+                    <Border Classes="stage-pill"
+                            IsVisible="{Binding CurrentFileHasBackup}">
+                        <TextBlock Text="Backup" FontSize="11" Foreground="#706E69"/>
+                    </Border>
+                    <Border Classes="stage-pill"
+                            IsVisible="{Binding CurrentFileHasTelegram}">
+                        <TextBlock Text="Telegram" FontSize="11" Foreground="#706E69"/>
+                    </Border>
+                    <Border Classes="stage-pill stage-pill-danger"
+                            IsVisible="{Binding CurrentFileHasDelete}">
+                        <TextBlock Text="Delete" FontSize="11" Foreground="#DC2626"/>
+                    </Border>
+                </WrapPanel>
+
+                <!-- Cancel button -->
+                <Button Command="{Binding CancelPipelineCommand}"
+                        HorizontalAlignment="Center"
+                        Padding="24,9"
+                        Background="#DDDAD4"
+                        BorderThickness="0"
+                        CornerRadius="6"
+                        FontSize="13"
+                        Foreground="#3A3835">
+                    ◻  Cancel
+                </Button>
+
+            </StackPanel>
+        </Border>
+    </Border>
+
+    <!-- ════════════════════════════════════════════
+         Summary overlay — shown after pipeline finishes
+         ════════════════════════════════════════════ -->
+    <Border IsVisible="{Binding HasSummary}"
+            Background="#99000000">
+        <Border Background="#EDECEA"
+                CornerRadius="10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Width="460"
+                BoxShadow="0 8 40 0 #33000000">
+            <StackPanel Margin="28,24">
+
+                <!-- Title -->
+                <TextBlock Text="{Binding SummaryTitle}"
+                           FontSize="17"
+                           FontWeight="Bold"
+                           Foreground="#1C1C1C"
+                           Margin="0,0,0,20"/>
+
+                <!-- Stats -->
+                <Grid ColumnDefinitions="*,Auto"
+                      RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                      Margin="0,0,0,20">
+
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                               Text="Backed up"
+                               FontSize="13" Foreground="#706E69" Margin="0,0,0,10"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1"
+                               Text="{Binding LastRunSummary.BackedUp}"
+                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0"
+                               Text="Sent to Telegram"
+                               FontSize="13" Foreground="#706E69" Margin="0,0,0,10"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1"
+                               Text="{Binding LastRunSummary.SentToTelegram}"
+                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0"
+                               Text="Deleted"
+                               FontSize="13" Foreground="#706E69" Margin="0,0,0,10"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1"
+                               Text="{Binding LastRunSummary.Deleted}"
+                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"/>
+
+                    <TextBlock Grid.Row="3" Grid.Column="0"
+                               Text="Duplicates skipped"
+                               FontSize="13" Foreground="#706E69" Margin="0,0,0,10"/>
+                    <TextBlock Grid.Row="3" Grid.Column="1"
+                               Text="{Binding LastRunSummary.DuplicatesSkipped}"
+                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"/>
+
+                    <TextBlock Grid.Row="4" Grid.Column="0"
+                               Text="Failed"
+                               FontSize="13" Foreground="#706E69"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1"
+                               Text="{Binding LastRunSummary.Failed}"
+                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"
+                               Classes.danger="{Binding SummaryHasFailures}"/>
+                </Grid>
+
+                <!-- Failed files list (only when there are failures) -->
+                <StackPanel IsVisible="{Binding SummaryHasFailures}"
+                            Margin="0,0,0,20">
+                    <TextBlock Text="FAILED FILES"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               Foreground="#A09D97"
+                               Margin="0,0,0,8"/>
+                    <Border Background="#F5F3EF"
+                            CornerRadius="6"
+                            Padding="12">
+                        <ScrollViewer MaxHeight="130">
+                            <ItemsControl ItemsSource="{Binding LastRunSummary.FailedFiles}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,0,0,8">
+                                            <TextBlock Text="{Binding FileName}"
+                                                       FontSize="12"
+                                                       FontWeight="Medium"
+                                                       Foreground="#1C1C1C"/>
+                                            <TextBlock Text="{Binding Reason}"
+                                                       FontSize="11"
+                                                       Foreground="#A09D97"
+                                                       TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+
+                <!-- OK button -->
+                <Button Command="{Binding DismissSummaryCommand}"
+                        HorizontalAlignment="Center"
+                        Padding="32,9"
+                        Background="#1C1C1C"
+                        Foreground="White"
+                        BorderThickness="0"
+                        CornerRadius="6"
+                        FontSize="13"
+                        FontWeight="Medium">
+                    OK
+                </Button>
+
+            </StackPanel>
+        </Border>
+    </Border>
+
+    </Grid>
 </UserControl>

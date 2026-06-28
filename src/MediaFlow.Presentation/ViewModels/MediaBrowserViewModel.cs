@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -19,6 +20,7 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     private enum SortMode  { Desc, Asc, None }
 
     private readonly LoadMediaUseCase _loadMedia;
+    private readonly RunPipelineUseCase _runPipeline;
     private readonly IThumbnailService _thumbnails;
 
     private DeviceProfile? _device;
@@ -31,6 +33,19 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     private SortMode   _sortModeName   = SortMode.Desc;
     private SortMode   _sortModeSize   = SortMode.Desc;
     private CancellationTokenSource _cts = new();
+
+    private bool _isPipelineRunning;
+    private string _currentFileName = "";
+    private int _currentIndex;
+    private int _totalFiles;
+    private RunSummary? _lastRunSummary;
+    private CancellationTokenSource _pipelineCts = new();
+    private bool _wasRunCancelled;
+    private bool _currentFileIsVideo;
+    private bool _currentFileHasRotation;
+    private bool _currentFileHasBackup;
+    private bool _currentFileHasTelegram;
+    private bool _currentFileHasDelete;
 
     // Raw list — all loaded files regardless of filter
     public ObservableCollection<FileRowViewModel> Files { get; } = [];
@@ -65,6 +80,91 @@ public sealed class MediaBrowserViewModel : ViewModelBase
 
     public bool HasLoadError => _loadError is not null;
 
+    public bool IsPipelineRunning
+    {
+        get => _isPipelineRunning;
+        private set => this.RaiseAndSetIfChanged(ref _isPipelineRunning, value);
+    }
+
+    public string CurrentFileName
+    {
+        get => _currentFileName;
+        private set => this.RaiseAndSetIfChanged(ref _currentFileName, value);
+    }
+
+    public int CurrentIndex
+    {
+        get => _currentIndex;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _currentIndex, value);
+            this.RaisePropertyChanged(nameof(ProgressPercent));
+            this.RaisePropertyChanged(nameof(ProgressText));
+            this.RaisePropertyChanged(nameof(ProgressPercentText));
+        }
+    }
+
+    public int TotalFiles
+    {
+        get => _totalFiles;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _totalFiles, value);
+            this.RaisePropertyChanged(nameof(PipelineSubtitle));
+        }
+    }
+
+    public RunSummary? LastRunSummary
+    {
+        get => _lastRunSummary;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _lastRunSummary, value);
+            this.RaisePropertyChanged(nameof(HasSummary));
+            this.RaisePropertyChanged(nameof(SummaryHasFailures));
+            this.RaisePropertyChanged(nameof(SummaryTitle));
+        }
+    }
+
+    public bool HasSummary         => _lastRunSummary is not null;
+    public bool SummaryHasFailures => _lastRunSummary?.Failed > 0;
+    public string SummaryTitle     => _wasRunCancelled ? "Pipeline cancelled" : "Pipeline complete";
+
+    public bool CurrentFileIsVideo
+    {
+        get => _currentFileIsVideo;
+        private set => this.RaiseAndSetIfChanged(ref _currentFileIsVideo, value);
+    }
+
+    public bool CurrentFileHasRotation
+    {
+        get => _currentFileHasRotation;
+        private set => this.RaiseAndSetIfChanged(ref _currentFileHasRotation, value);
+    }
+
+    public bool CurrentFileHasBackup
+    {
+        get => _currentFileHasBackup;
+        private set => this.RaiseAndSetIfChanged(ref _currentFileHasBackup, value);
+    }
+
+    public bool CurrentFileHasTelegram
+    {
+        get => _currentFileHasTelegram;
+        private set => this.RaiseAndSetIfChanged(ref _currentFileHasTelegram, value);
+    }
+
+    public bool CurrentFileHasDelete
+    {
+        get => _currentFileHasDelete;
+        private set => this.RaiseAndSetIfChanged(ref _currentFileHasDelete, value);
+    }
+
+    public double ProgressPercent => TotalFiles == 0 ? 0 : (double)CurrentIndex / TotalFiles * 100;
+    public string ProgressText => $"{CurrentIndex} of {TotalFiles}";
+    public string ProgressPercentText => $"{(int)ProgressPercent}%";
+    public string PipelineSubtitle => $"{DeviceName} · {TotalFiles} file{(TotalFiles == 1 ? "" : "s")}";
+
     public string StatusText =>
         Files.Count == 0
             ? "No files loaded"
@@ -78,22 +178,28 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     public string SortLabelName => _sortModeName switch { SortMode.Desc => "Name ▾", SortMode.Asc => "Name ▴", _ => "Name -" };
     public string SortLabelSize => _sortModeSize switch { SortMode.Desc => "Size ▾", SortMode.Asc => "Size ▴", _ => "Size -" };
 
-    public ReactiveCommand<Unit, Unit> LoadMoreCommand    { get; }
-    public ReactiveCommand<Unit, Unit> BackCommand        { get; }
-    public ReactiveCommand<Unit, Unit> ShowAllCommand     { get; }
-    public ReactiveCommand<Unit, Unit> ShowImagesCommand  { get; }
-    public ReactiveCommand<Unit, Unit> ShowVideosCommand  { get; }
-    public ReactiveCommand<Unit, Unit> ApplyToAllCommand  { get; }
-    public ReactiveCommand<Unit, Unit> RunPipelineCommand { get; }
-    public ReactiveCommand<Unit, Unit> ToggleSortDateCommand  { get; }
-    public ReactiveCommand<Unit, Unit> ToggleSortNameCommand  { get; }
-    public ReactiveCommand<Unit, Unit> ToggleSortSizeCommand  { get; }
+    public ReactiveCommand<Unit, Unit> LoadMoreCommand       { get; }
+    public ReactiveCommand<Unit, Unit> BackCommand           { get; }
+    public ReactiveCommand<Unit, Unit> ShowAllCommand        { get; }
+    public ReactiveCommand<Unit, Unit> ShowImagesCommand     { get; }
+    public ReactiveCommand<Unit, Unit> ShowVideosCommand     { get; }
+    public ReactiveCommand<Unit, Unit> ApplyToAllCommand      { get; }
+    public ReactiveCommand<Unit, Unit> RunPipelineCommand    { get; }
+    public ReactiveCommand<Unit, Unit> CancelPipelineCommand { get; }
+    public ReactiveCommand<Unit, Unit> DismissSummaryCommand { get; }
+    public ReactiveCommand<Unit, Unit> ToggleSortDateCommand { get; }
+    public ReactiveCommand<Unit, Unit> ToggleSortNameCommand { get; }
+    public ReactiveCommand<Unit, Unit> ToggleSortSizeCommand { get; }
 
     public event Action? BackRequested;
 
-    public MediaBrowserViewModel(LoadMediaUseCase loadMedia, IThumbnailService thumbnails)
+    public MediaBrowserViewModel(
+        LoadMediaUseCase loadMedia,
+        RunPipelineUseCase runPipeline,
+        IThumbnailService thumbnails)
     {
         _loadMedia = loadMedia;
+        _runPipeline = runPipeline;
         _thumbnails = thumbnails;
 
         Files.CollectionChanged += (_, _) => this.RaisePropertyChanged(nameof(StatusText));
@@ -103,16 +209,25 @@ public sealed class MediaBrowserViewModel : ViewModelBase
             x => x.HasMore,
             (loading, more) => !loading && more);
 
-        LoadMoreCommand    = ReactiveCommand.CreateFromTask(LoadBatchAsync, canLoadMore);
-        BackCommand        = ReactiveCommand.Create(Back);
-        ShowAllCommand     = ReactiveCommand.Create(() => SetFilter(FilterMode.All));
-        ShowImagesCommand  = ReactiveCommand.Create(() => SetFilter(FilterMode.Images));
-        ShowVideosCommand  = ReactiveCommand.Create(() => SetFilter(FilterMode.Videos));
-        ApplyToAllCommand  = ReactiveCommand.Create(() => { }); // Phase 5
-        RunPipelineCommand = ReactiveCommand.Create(() => { }); // Phase 5
-        ToggleSortDateCommand  = ReactiveCommand.Create(ToggleSortDate);
-        ToggleSortNameCommand  = ReactiveCommand.Create(ToggleSortName);
-        ToggleSortSizeCommand  = ReactiveCommand.Create(ToggleSortSize);
+        var canRunPipeline = this.WhenAnyValue(
+            x => x.IsLoading,
+            x => x.IsPipelineRunning,
+            (loading, running) => !loading && !running);
+
+        var canCancel = this.WhenAnyValue(x => x.IsPipelineRunning);
+
+        LoadMoreCommand       = ReactiveCommand.CreateFromTask(LoadBatchAsync, canLoadMore);
+        BackCommand           = ReactiveCommand.Create(Back);
+        ShowAllCommand        = ReactiveCommand.Create(() => SetFilter(FilterMode.All));
+        ShowImagesCommand     = ReactiveCommand.Create(() => SetFilter(FilterMode.Images));
+        ShowVideosCommand     = ReactiveCommand.Create(() => SetFilter(FilterMode.Videos));
+        ApplyToAllCommand     = ReactiveCommand.Create(() => { });
+        RunPipelineCommand    = ReactiveCommand.CreateFromTask(RunPipelineAsync, canRunPipeline);
+        CancelPipelineCommand = ReactiveCommand.Create(CancelPipeline, canCancel);
+        DismissSummaryCommand = ReactiveCommand.Create(DismissSummary);
+        ToggleSortDateCommand = ReactiveCommand.Create(ToggleSortDate);
+        ToggleSortNameCommand = ReactiveCommand.Create(ToggleSortName);
+        ToggleSortSizeCommand = ReactiveCommand.Create(ToggleSortSize);
     }
 
     public void Initialize(DeviceProfile device)
@@ -239,6 +354,61 @@ public sealed class MediaBrowserViewModel : ViewModelBase
         FilteredFiles.Clear();
         foreach (var f in sorted ?? source)
             FilteredFiles.Add(f);
+    }
+
+    private void UpdateCurrentFileStages(string fileName)
+    {
+        var row = Files.FirstOrDefault(r => r.FileName == fileName);
+        if (row is null) return;
+        var actions = row.AssignedActions;
+        CurrentFileIsVideo     = row.Context.Type == FileType.Video;
+        CurrentFileHasRotation = (actions & (MediaAction.RotateLeft | MediaAction.RotateRight | MediaAction.Flip180)) != MediaAction.None;
+        CurrentFileHasBackup   = actions.HasFlag(MediaAction.SaveToBackup);
+        CurrentFileHasTelegram = actions.HasFlag(MediaAction.SendToTelegram);
+        CurrentFileHasDelete   = actions.HasFlag(MediaAction.DeleteAfter);
+    }
+
+    private async Task RunPipelineAsync()
+    {
+        if (_device is null) return;
+
+        var filesToProcess = Files
+            .Where(r => r.HasAnyAction)
+            .Select(r => r.Context with { AssignedActions = r.AssignedActions })
+            .ToList();
+
+        if (filesToProcess.Count == 0) return;
+
+        _pipelineCts = new CancellationTokenSource();
+        var ct = _pipelineCts.Token;
+
+        _wasRunCancelled = false;
+        TotalFiles = filesToProcess.Count;
+        IsPipelineRunning = true;
+
+        var observer = new PipelineProgressObserver(
+            onFileStarted: (name, index, _) => { CurrentFileName = name; CurrentIndex = index; UpdateCurrentFileStages(name); },
+            onFinished: summary => LastRunSummary = summary,
+            onCancelled: () => { _wasRunCancelled = true; });
+
+        try
+        {
+            await _runPipeline.ExecuteAsync(filesToProcess, _device, observer, ct);
+        }
+        catch (OperationCanceledException) { }
+
+        finally
+        {
+            IsPipelineRunning = false;
+        }
+    }
+
+    private void CancelPipeline() => _pipelineCts.Cancel();
+
+    private void DismissSummary()
+    {
+        _wasRunCancelled = false;
+        LastRunSummary = null;
     }
 
     private async Task LoadBatchAsync()
