@@ -7,7 +7,7 @@
         x:Class="MediaFlow.Presentation.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="MediaFlow"
-        Icon="avares://MediaFlow.Presentation/Assets/Icons/AppIconWindows.ico"
+        Icon="avares://MediaFlow.Presentation/Assets/App-Icons/AppIconWindows.ico"
         WindowState="Maximized"
         MinWidth="900" MinHeight="600">
 
@@ -29,7 +29,7 @@
                         Cursor="Hand"
                         HorizontalContentAlignment="Left">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Image Source="avares://MediaFlow.Presentation/Assets/Icons/in-app-icon.png"
+                        <Image Source="avares://MediaFlow.Presentation/Assets/App-Icons/in-app-icon.png"
                                Width="26" Height="26"
                                VerticalAlignment="Center"
                                RenderOptions.BitmapInterpolationMode="HighQuality"/>

@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using MediaFlow.Infrastructure;
+using MediaFlow.Presentation.Services;
 using MediaFlow.Presentation.ViewModels;
 using MediaFlow.Presentation.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +20,7 @@ public partial class App : Avalonia.Application
     {
         var services = new ServiceCollection();
         services.AddMediaFlowServices();
+        services.AddSingleton<IDialogService, DialogService>();
         services.AddTransient<DeviceListViewModel>();
         services.AddTransient<ProfileEditorViewModel>();
         services.AddTransient<MediaBrowserViewModel>();

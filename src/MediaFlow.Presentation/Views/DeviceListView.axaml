@@ -44,11 +44,11 @@
             <Setter Property="Background" Value="#DEDBD3"/>
         </Style>
         <Style Selector="Button.danger">
-            <Setter Property="Background" Value="#FEE2E2"/>
+            <Setter Property="Background" Value="#EF4444"/>
             <Setter Property="CornerRadius" Value="5"/>
         </Style>
         <Style Selector="Button.danger:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#FECACA"/>
+            <Setter Property="Background" Value="#DC2626"/>
         </Style>
         <Style Selector="Button.add-btn">
             <Setter Property="Background" Value="#1C1C1C"/>
@@ -206,26 +206,9 @@
                                                     Classes="danger"
                                                     Command="{Binding DeleteCommand}"
                                                     Padding="10,9">
-                                                <!-- Trash icon -->
-                                                <Canvas Width="13" Height="14">
-                                                    <Rectangle Canvas.Left="1" Canvas.Top="3"
-                                                               Width="11" Height="10"
-                                                               RadiusX="1" RadiusY="1"
-                                                               Fill="#DC2626"/>
-                                                    <Rectangle Canvas.Left="0" Canvas.Top="2"
-                                                               Width="13" Height="2"
-                                                               Fill="#DC2626"/>
-                                                    <Rectangle Canvas.Left="4" Canvas.Top="0"
-                                                               Width="5" Height="3"
-                                                               RadiusX="1" RadiusY="1"
-                                                               Fill="#DC2626"/>
-                                                    <Rectangle Canvas.Left="4.5" Canvas.Top="5"
-                                                               Width="1.5" Height="5"
-                                                               Fill="White"/>
-                                                    <Rectangle Canvas.Left="7.5" Canvas.Top="5"
-                                                               Width="1.5" Height="5"
-                                                               Fill="White"/>
-                                                </Canvas>
+                                                <Image Source="avares://MediaFlow.Presentation/Assets/UI-Icons/bin.png"
+                                                       Width="14" Height="14"
+                                                       RenderOptions.BitmapInterpolationMode="HighQuality"/>
                                             </Button>
                                         </Grid>
 

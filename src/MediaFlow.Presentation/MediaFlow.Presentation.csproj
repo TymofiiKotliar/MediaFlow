@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Assets\Icons\AppIconWindows.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\App-Icons\AppIconWindows.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
