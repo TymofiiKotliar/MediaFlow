@@ -10,9 +10,21 @@
     <UserControl.Styles>
         <Style Selector="Ellipse.status-ok">
             <Setter Property="Fill" Value="#22C55E"/>
+            <Setter Property="Effect">
+                <DropShadowEffect Color="#22C55E" BlurRadius="8" OffsetX="0" OffsetY="0" Opacity="0.8"/>
+            </Setter>
+        </Style>
+        <Style Selector="Ellipse.status-warn">
+            <Setter Property="Fill" Value="#EAB308"/>
+            <Setter Property="Effect">
+                <DropShadowEffect Color="#EAB308" BlurRadius="8" OffsetX="0" OffsetY="0" Opacity="0.8"/>
+            </Setter>
         </Style>
         <Style Selector="Ellipse.status-err">
             <Setter Property="Fill" Value="#EF4444"/>
+            <Setter Property="Effect">
+                <DropShadowEffect Color="#EF4444" BlurRadius="8" OffsetX="0" OffsetY="0" Opacity="0.8"/>
+            </Setter>
         </Style>
         <Style Selector="Button.primary">
             <Setter Property="Background" Value="#1C1C1C"/>
@@ -119,12 +131,13 @@
                                                  Fill="#BCBAB1"/>
                                     </Canvas>
 
-                                    <!-- Source status dot (green = accessible, red = not) -->
+                                    <!-- Status dot: green = source+backup OK, yellow = source only, red = source missing -->
                                     <Ellipse Width="10" Height="10"
                                              HorizontalAlignment="Left"
                                              VerticalAlignment="Bottom"
                                              Margin="12,0,0,10"
-                                             Classes.status-ok="{Binding IsSourceAccessible}"
+                                             Classes.status-ok="{Binding IsStatusOk}"
+                                             Classes.status-warn="{Binding IsStatusWarn}"
                                              Classes.status-err="{Binding !IsSourceAccessible}"/>
                                 </Grid>
 

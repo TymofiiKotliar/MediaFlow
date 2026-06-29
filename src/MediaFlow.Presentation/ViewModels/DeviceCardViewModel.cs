@@ -10,6 +10,9 @@ public sealed class DeviceCardViewModel : ViewModelBase
 {
     public DeviceProfile Profile { get; }
     public bool IsSourceAccessible { get; }
+    public bool IsBackupAccessible { get; }
+    public bool IsStatusOk => IsSourceAccessible && IsBackupAccessible;
+    public bool IsStatusWarn => IsSourceAccessible && !IsBackupAccessible;
     public string FilesPerLoadText => $"{Profile.FilesPerLoad} files / load";
 
     public ReactiveCommand<Unit, Unit> OpenCommand { get; }
@@ -20,6 +23,7 @@ public sealed class DeviceCardViewModel : ViewModelBase
     {
         Profile = profile;
         IsSourceAccessible = Directory.Exists(profile.SourceFolderPath);
+        IsBackupAccessible = Directory.Exists(profile.BackupFolderPath);
         OpenCommand = ReactiveCommand.Create(onOpen);
         EditCommand = ReactiveCommand.Create(onEdit);
         DeleteCommand = ReactiveCommand.Create(onDelete);

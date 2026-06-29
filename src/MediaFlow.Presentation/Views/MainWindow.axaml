@@ -41,13 +41,6 @@
                     </StackPanel>
                 </Button>
 
-                <!-- Version -->
-                <TextBlock DockPanel.Dock="Bottom"
-                           Text="v1.0.0"
-                           Padding="16,12"
-                           Foreground="#A09D97"
-                           FontSize="11"/>
-
                 <!-- Nav items -->
                 <StackPanel Margin="8,4,8,0">
                     <Button Command="{Binding NavigateToDeviceListCommand}"
@@ -55,6 +48,7 @@
                             BorderThickness="0"
                             Padding="0"
                             Cursor="Hand"
+                            HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch">
                         <Border Background="#DEDAD1"
                                 CornerRadius="5"
