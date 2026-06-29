@@ -14,5 +14,15 @@ public static class AppPaths
     {
         Directory.CreateDirectory(AppData);
         Directory.CreateDirectory(TempFolder);
+        SweepTempFolder();
+    }
+
+    private static void SweepTempFolder()
+    {
+        foreach (var file in Directory.EnumerateFiles(TempFolder))
+        {
+            try { File.Delete(file); }
+            catch { }
+        }
     }
 }

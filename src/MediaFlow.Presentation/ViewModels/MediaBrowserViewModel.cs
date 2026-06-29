@@ -233,7 +233,6 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     public void Initialize(DeviceProfile device)
     {
         _cts.Cancel();
-        CleanupTempFiles();
         _cts = new CancellationTokenSource();
 
         _device = device;
@@ -256,17 +255,7 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     private void Back()
     {
         _cts.Cancel();
-        CleanupTempFiles();
         BackRequested?.Invoke();
-    }
-
-    private void CleanupTempFiles()
-    {
-        foreach (var row in Files)
-        {
-            try { File.Delete(row.Context.TempPath); }
-            catch { /* best-effort; file may still be open by thumbnail loader */ }
-        }
     }
 
     private static SortMode NextSortMode(SortMode current) => current switch
