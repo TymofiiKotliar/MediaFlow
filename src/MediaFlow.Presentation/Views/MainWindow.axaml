@@ -7,7 +7,7 @@
         x:Class="MediaFlow.Presentation.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="MediaFlow"
-        Width="1200" Height="800"
+        WindowState="Maximized"
         MinWidth="900" MinHeight="600">
 
     <Grid ColumnDefinitions="180,*">
