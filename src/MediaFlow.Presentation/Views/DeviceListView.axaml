@@ -36,12 +36,13 @@
             <Setter Property="Background" Value="#333333"/>
         </Style>
         <Style Selector="Button.secondary">
-            <Setter Property="Background" Value="#EDEAE3"/>
+            <Setter Property="Background" Value="#DCD7CB"/>
             <Setter Property="Foreground" Value="#1C1C1C"/>
             <Setter Property="CornerRadius" Value="5"/>
         </Style>
         <Style Selector="Button.secondary:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#DEDBD3"/>
+            <Setter Property="Background" Value="#EAE7E0"/>
+            <Setter Property="Foreground" Value="#1C1C1C"/>
         </Style>
         <Style Selector="Button.danger">
             <Setter Property="Background" Value="#EF4444"/>
