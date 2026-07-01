@@ -9,11 +9,13 @@ public static class AppPaths
     public static string AppData   => Base;
     public static string TempFolder => Path.Combine(Base, "temp");
     public static string DatabaseFile => Path.Combine(Base, "devices.db");
+    public static string DeviceProfilePicturesFolder => Path.Combine(Base, "device-pictures");
 
     public static void EnsureCreated()
     {
         Directory.CreateDirectory(AppData);
         Directory.CreateDirectory(TempFolder);
+        Directory.CreateDirectory(DeviceProfilePicturesFolder);
         SweepTempFolder();
     }
 

@@ -110,27 +110,22 @@
                                 ClipToBounds="True">
                             <StackPanel>
 
-                                <!-- Thumbnail area (hatched placeholder) -->
-                                <Grid Height="170">
+                                <!-- Thumbnail area (real picture, falls back to hatched placeholder) -->
+                                <Grid Height="170" ClipToBounds="True">
                                     <Rectangle Fill="#E2DFD8"/>
 
-                                    <!-- Camera icon -->
-                                    <Canvas Width="40" Height="30"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
-                                        <Rectangle Canvas.Left="0" Canvas.Top="5"
-                                                   Width="28" Height="20"
-                                                   Fill="#BCBAB1" RadiusX="3" RadiusY="3"/>
-                                        <Ellipse Canvas.Left="8" Canvas.Top="9"
-                                                 Width="12" Height="12"
-                                                 Fill="#A6A49C"/>
-                                        <Ellipse Canvas.Left="10.5" Canvas.Top="11.5"
-                                                 Width="7" Height="7"
-                                                 Fill="#E2DFD8"/>
-                                        <Polygon Canvas.Left="0" Canvas.Top="0"
-                                                 Points="28,5 40,10 40,20 28,25"
-                                                 Fill="#BCBAB1"/>
-                                    </Canvas>
+                                    <!-- Real device picture -->
+                                    <Image Source="{Binding ProfilePicture}"
+                                           IsVisible="{Binding HasProfilePicture}"
+                                           Stretch="{Binding PictureStretch}"/>
+
+                                    <!-- Default icon placeholder -->
+                                    <Image Source="avares://MediaFlow.Presentation/Assets/App-Icons/in-app-icon.png"
+                                           Width="48" Height="48"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           RenderOptions.BitmapInterpolationMode="HighQuality"
+                                           IsVisible="{Binding !HasProfilePicture}"/>
 
                                     <!-- Status dot: green = source+backup OK, yellow = source only, red = source missing -->
                                     <Ellipse Width="10" Height="10"
@@ -172,7 +167,7 @@
                                                    Margin="0,0,0,2"/>
                                         <TextBlock Text="{Binding Profile.SourceFolderPath}"
                                                    FontSize="12"
-                                                   Foreground="#3B82F6"
+                                                   Foreground="#1C1C1C"
                                                    TextTrimming="CharacterEllipsis"
                                                    Margin="0,0,0,10"/>
 
@@ -184,7 +179,7 @@
                                                    Margin="0,0,0,2"/>
                                         <TextBlock Text="{Binding Profile.BackupFolderPath}"
                                                    FontSize="12"
-                                                   Foreground="#3B82F6"
+                                                   Foreground="#1C1C1C"
                                                    TextTrimming="CharacterEllipsis"
                                                    Margin="0,0,0,16"/>
 

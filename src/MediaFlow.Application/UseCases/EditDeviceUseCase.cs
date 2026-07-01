@@ -27,7 +27,9 @@ public sealed class EditDeviceUseCase(IDeviceRepository repository)
             NamingTemplate = input.NamingTemplate,
             TelegramBotToken = input.TelegramBotToken,
             TelegramChatId = input.TelegramChatId,
-            FilesPerLoad = input.FilesPerLoad
+            FilesPerLoad = input.FilesPerLoad,
+            ProfilePicturePath = input.ProfilePicturePath,
+            ProfilePictureFitMode = input.ProfilePictureFitMode
         };
 
         await repository.SaveAsync(updated, ct);

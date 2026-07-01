@@ -1,13 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using MediaFlow.Application.UseCases;
 using MediaFlow.Application.Validation;
 using MediaFlow.Domain.Entities;
+using MediaFlow.Domain.Enums;
+using MediaFlow.Domain.Interfaces;
 using MediaFlow.Domain.ValueObjects;
 using ReactiveUI;
 
@@ -18,6 +23,7 @@ public sealed class ProfileEditorViewModel : ViewModelBase
     private readonly RegisterDeviceUseCase _register;
     private readonly EditDeviceUseCase _edit;
     private readonly BuildNamingTemplateUseCase _buildNaming;
+    private readonly IDeviceProfilePictureStore _pictureStore;
 
     private string? _editingId;
     private string _name = "";
@@ -28,6 +34,13 @@ public sealed class ProfileEditorViewModel : ViewModelBase
     private string _filesPerLoad = "50";
     private string _prefixInput = "";
     private string _namingPreview = "";
+
+    private string? _originalProfilePicturePath;
+    private byte[]? _pendingPictureBytes;
+    private string? _pendingPictureExtension;
+    private bool _removePicture;
+    private Bitmap? _profilePicturePreview;
+    private ProfilePictureFitMode _selectedFitMode = ProfilePictureFitMode.Crop;
 
     public string Name
     {
@@ -76,6 +89,42 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         get => _namingPreview;
         private set => this.RaiseAndSetIfChanged(ref _namingPreview, value);
     }
+
+    public Bitmap? ProfilePicturePreview
+    {
+        get => _profilePicturePreview;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _profilePicturePreview, value);
+            this.RaisePropertyChanged(nameof(HasProfilePicturePreview));
+        }
+    }
+
+    public bool HasProfilePicturePreview => _profilePicturePreview is not null;
+
+    public ProfilePictureFitMode SelectedFitMode
+    {
+        get => _selectedFitMode;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedFitMode, value);
+            this.RaisePropertyChanged(nameof(IsCropSelected));
+            this.RaisePropertyChanged(nameof(IsFitSelected));
+            this.RaisePropertyChanged(nameof(IsStretchSelected));
+            this.RaisePropertyChanged(nameof(PreviewStretch));
+        }
+    }
+
+    public bool IsCropSelected => _selectedFitMode == ProfilePictureFitMode.Crop;
+    public bool IsFitSelected => _selectedFitMode == ProfilePictureFitMode.Fit;
+    public bool IsStretchSelected => _selectedFitMode == ProfilePictureFitMode.Stretch;
+
+    public Stretch PreviewStretch => _selectedFitMode switch
+    {
+        ProfilePictureFitMode.Fit => Stretch.Uniform,
+        ProfilePictureFitMode.Stretch => Stretch.Fill,
+        _ => Stretch.UniformToFill
+    };
 
     private string? _nameError;
     private string? _sourceFolderError;
@@ -135,12 +184,18 @@ public sealed class ProfileEditorViewModel : ViewModelBase
     // Set by the View after DataContext is assigned, so Browse commands can open a folder picker.
     public Func<Task<string?>>? BrowseFolderFunc { get; set; }
 
+    // Set by the View after DataContext is assigned, so ChoosePicture can open a file picker.
+    public Func<Task<(byte[] Bytes, string Extension)?>>? BrowseImageFunc { get; set; }
+
     public ReactiveCommand<Unit, Unit> BrowseSourceCommand { get; }
     public ReactiveCommand<Unit, Unit> BrowseBackupCommand { get; }
     public ReactiveCommand<Unit, Unit> AddPrefixCommand { get; }
     public ReactiveCommand<Unit, Unit> AddSequenceNumberCommand { get; }
     public ReactiveCommand<Unit, Unit> AddCurrentDateCommand { get; }
     public ReactiveCommand<Unit, Unit> AddPhotoDateCommand { get; }
+    public ReactiveCommand<Unit, Unit> ChoosePictureCommand { get; }
+    public ReactiveCommand<Unit, Unit> RemovePictureCommand { get; }
+    public ReactiveCommand<ProfilePictureFitMode, Unit> SelectFitModeCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveCommand { get; }
     public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
@@ -150,11 +205,13 @@ public sealed class ProfileEditorViewModel : ViewModelBase
     public ProfileEditorViewModel(
         RegisterDeviceUseCase register,
         EditDeviceUseCase edit,
-        BuildNamingTemplateUseCase buildNaming)
+        BuildNamingTemplateUseCase buildNaming,
+        IDeviceProfilePictureStore pictureStore)
     {
         _register = register;
         _edit = edit;
         _buildNaming = buildNaming;
+        _pictureStore = pictureStore;
 
         Chips.CollectionChanged += (_, _) => UpdatePreview();
         Chips.Add(_cursor);
@@ -168,6 +225,9 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         AddSequenceNumberCommand = ReactiveCommand.Create(() => AddChip(new SequenceNumberToken()));
         AddCurrentDateCommand = ReactiveCommand.Create(() => AddChip(new CurrentDateToken()));
         AddPhotoDateCommand = ReactiveCommand.Create(() => AddChip(new PhotoDateToken()));
+        ChoosePictureCommand = ReactiveCommand.CreateFromTask(ChoosePictureAsync);
+        RemovePictureCommand = ReactiveCommand.Create(RemovePicture);
+        SelectFitModeCommand = ReactiveCommand.Create<ProfilePictureFitMode>(mode => SelectedFitMode = mode);
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
         CancelCommand = ReactiveCommand.Create(() => CancelRequested?.Invoke());
 
@@ -184,6 +244,13 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         TelegramChatId = profile?.TelegramChatId ?? "";
         FilesPerLoad = (profile?.FilesPerLoad ?? 50).ToString();
         PrefixInput = "";
+
+        _originalProfilePicturePath = profile?.ProfilePicturePath;
+        _pendingPictureBytes = null;
+        _pendingPictureExtension = null;
+        _removePicture = false;
+        SelectedFitMode = profile?.ProfilePictureFitMode ?? ProfilePictureFitMode.Crop;
+        LoadExistingPicturePreview(_originalProfilePicturePath);
 
         Chips.Clear();
         if (profile?.NamingTemplate is not null)
@@ -255,6 +322,44 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         if (path is not null) BackupFolderPath = path;
     }
 
+    private async Task ChoosePictureAsync()
+    {
+        if (BrowseImageFunc is null) return;
+        var picked = await BrowseImageFunc();
+        if (picked is null) return;
+
+        _pendingPictureBytes = picked.Value.Bytes;
+        _pendingPictureExtension = picked.Value.Extension;
+        _removePicture = false;
+        ProfilePicturePreview = LoadBitmap(_pendingPictureBytes);
+    }
+
+    private void RemovePicture()
+    {
+        _pendingPictureBytes = null;
+        _pendingPictureExtension = null;
+        _removePicture = _originalProfilePicturePath is not null;
+        ProfilePicturePreview = null;
+    }
+
+    private void LoadExistingPicturePreview(string? path)
+    {
+        if (string.IsNullOrEmpty(path) || !File.Exists(path))
+        {
+            ProfilePicturePreview = null;
+            return;
+        }
+
+        try { ProfilePicturePreview = LoadBitmap(File.ReadAllBytes(path)); }
+        catch { ProfilePicturePreview = null; }
+    }
+
+    private static Bitmap LoadBitmap(byte[] bytes)
+    {
+        using var ms = new MemoryStream(bytes);
+        return new Bitmap(ms);
+    }
+
     private void ClearErrors()
     {
         NameError = null;
@@ -285,6 +390,14 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         if (!int.TryParse(FilesPerLoad, out var filesPerLoad))
             filesPerLoad = 0;
 
+        // Written speculatively; only kept if the save below actually succeeds.
+        var newlyWrittenPicturePath = _pendingPictureBytes is not null
+            ? await _pictureStore.SaveAsync(_pendingPictureBytes, _pendingPictureExtension ?? ".png")
+            : null;
+
+        var profilePicturePath = newlyWrittenPicturePath
+            ?? (_removePicture ? null : _originalProfilePicturePath);
+
         var input = new DeviceProfileInput(
             Name: Name,
             SourceFolderPath: SourceFolderPath,
@@ -292,25 +405,38 @@ public sealed class ProfileEditorViewModel : ViewModelBase
             NamingTemplate: Chips.Where(c => !c.IsCursor).Select(c => c.Token!).ToList(),
             TelegramBotToken: TelegramBotToken,
             TelegramChatId: TelegramChatId,
-            FilesPerLoad: filesPerLoad);
+            FilesPerLoad: filesPerLoad,
+            ProfilePicturePath: profilePicturePath,
+            ProfilePictureFitMode: SelectedFitMode);
 
+        bool succeeded;
         if (_editingId is null)
         {
             var result = await _register.ExecuteAsync(input);
+            succeeded = result is not RegisterDeviceResult.ValidationFailed;
             if (result is RegisterDeviceResult.ValidationFailed vf)
-            {
                 ApplyErrors(vf.Errors);
-                return;
-            }
         }
         else
         {
             var result = await _edit.ExecuteAsync(_editingId, input);
+            succeeded = result is not EditDeviceResult.ValidationFailed;
             if (result is EditDeviceResult.ValidationFailed vf)
-            {
                 ApplyErrors(vf.Errors);
-                return;
-            }
+        }
+
+        if (!succeeded)
+        {
+            // Roll back the speculative write; the old picture (if any) is untouched.
+            if (newlyWrittenPicturePath is not null)
+                _pictureStore.Delete(newlyWrittenPicturePath);
+            return;
+        }
+
+        if (newlyWrittenPicturePath is not null || _removePicture)
+        {
+            if (!string.IsNullOrEmpty(_originalProfilePicturePath))
+                _pictureStore.Delete(_originalProfilePicturePath);
         }
 
         SaveCompleted?.Invoke();

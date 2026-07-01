@@ -22,7 +22,9 @@ public sealed class RegisterDeviceUseCase(IDeviceRepository repository)
             NamingTemplate: input.NamingTemplate,
             TelegramBotToken: input.TelegramBotToken,
             TelegramChatId: input.TelegramChatId,
-            FilesPerLoad: input.FilesPerLoad);
+            FilesPerLoad: input.FilesPerLoad,
+            ProfilePicturePath: input.ProfilePicturePath,
+            ProfilePictureFitMode: input.ProfilePictureFitMode);
 
         await repository.SaveAsync(profile, ct);
         return new RegisterDeviceResult.Success(profile);

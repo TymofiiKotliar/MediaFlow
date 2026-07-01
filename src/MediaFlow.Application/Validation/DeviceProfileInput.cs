@@ -1,3 +1,4 @@
+using MediaFlow.Domain.Enums;
 using MediaFlow.Domain.ValueObjects;
 
 namespace MediaFlow.Application.Validation;
@@ -9,5 +10,7 @@ public sealed record DeviceProfileInput(
     IReadOnlyList<NamingToken> NamingTemplate,
     string TelegramBotToken,
     string TelegramChatId,
-    int FilesPerLoad
+    int FilesPerLoad,
+    string? ProfilePicturePath = null,
+    ProfilePictureFitMode ProfilePictureFitMode = ProfilePictureFitMode.Crop
 );

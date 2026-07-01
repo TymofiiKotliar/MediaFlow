@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:MediaFlow.Presentation.ViewModels"
+             xmlns:enums="using:MediaFlow.Domain.Enums"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="1020" d:DesignHeight="800"
@@ -121,6 +122,27 @@
             <Setter Property="Background" Value="Transparent"/>
         </Style>
 
+        <Style Selector="Button.fit-toggle">
+            <Setter Property="Background" Value="#DCD7CB"/>
+            <Setter Property="Foreground" Value="#1C1C1C"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.fit-toggle:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#EAE7E0"/>
+            <Setter Property="Foreground" Value="#1C1C1C"/>
+        </Style>
+        <Style Selector="Button.fit-toggle.selected">
+            <Setter Property="Background" Value="#C2BDAF"/>
+            <Setter Property="Foreground" Value="#1C1C1C"/>
+        </Style>
+        <Style Selector="Button.fit-toggle.selected:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#B4AFA1"/>
+            <Setter Property="Foreground" Value="#1C1C1C"/>
+        </Style>
+
         <Style Selector="TextBox.error">
             <Setter Property="BorderBrush" Value="#DC2626"/>
         </Style>
@@ -163,6 +185,79 @@
                     <TextBlock Classes="field-error"
                                Text="{Binding NameError}"
                                IsVisible="{Binding HasNameError}"/>
+                </StackPanel>
+
+                <!-- ── Device image ── -->
+                <StackPanel Margin="0,0,0,20">
+                    <TextBlock Classes="field-label" Text="DEVICE IMAGE"/>
+                    <StackPanel Orientation="Horizontal" Spacing="14">
+
+                        <Border Width="330" Height="170"
+                                CornerRadius="8"
+                                ClipToBounds="True"
+                                Background="#E2DFD8"
+                                BorderBrush="#DDDAD4"
+                                BorderThickness="1">
+                            <Grid>
+                                <Image Source="{Binding ProfilePicturePreview}"
+                                       IsVisible="{Binding HasProfilePicturePreview}"
+                                       Stretch="{Binding PreviewStretch}"/>
+
+                                <!-- Default icon placeholder -->
+                                <Image Source="avares://MediaFlow.Presentation/Assets/App-Icons/in-app-icon.png"
+                                       Width="48" Height="48"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       RenderOptions.BitmapInterpolationMode="HighQuality"
+                                       IsVisible="{Binding !HasProfilePicturePreview}"/>
+                            </Grid>
+                        </Border>
+
+                        <Grid Height="170" RowDefinitions="Auto,*,Auto">
+                            <Button Grid.Row="0"
+                                    HorizontalAlignment="Left"
+                                    Classes="browse"
+                                    Content="Choose…"
+                                    Command="{Binding ChoosePictureCommand}"/>
+
+                            <StackPanel Grid.Row="1"
+                                        VerticalAlignment="Center"
+                                        Spacing="10"
+                                        IsVisible="{Binding HasProfilePicturePreview}">
+                                <Border Height="1" Background="#DDDAD4"/>
+                                <StackPanel Spacing="6">
+                                    <TextBlock Classes="field-label" Text="FIT MODE" Margin="0"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Button Classes="fit-toggle"
+                                                Classes.selected="{Binding IsCropSelected}"
+                                                Content="Crop"
+                                                Command="{Binding SelectFitModeCommand}"
+                                                CommandParameter="{x:Static enums:ProfilePictureFitMode.Crop}"/>
+                                        <Button Classes="fit-toggle"
+                                                Classes.selected="{Binding IsFitSelected}"
+                                                Content="Fit"
+                                                Command="{Binding SelectFitModeCommand}"
+                                                CommandParameter="{x:Static enums:ProfilePictureFitMode.Fit}"/>
+                                        <Button Classes="fit-toggle"
+                                                Classes.selected="{Binding IsStretchSelected}"
+                                                Content="Stretch"
+                                                Command="{Binding SelectFitModeCommand}"
+                                                CommandParameter="{x:Static enums:ProfilePictureFitMode.Stretch}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <Border Height="1" Background="#DDDAD4"/>
+                            </StackPanel>
+
+                            <Button Grid.Row="2"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Bottom"
+                                    Classes="browse"
+                                    Content="Remove"
+                                    IsVisible="{Binding HasProfilePicturePreview}"
+                                    Command="{Binding RemovePictureCommand}"/>
+                        </Grid>
+
+                    </StackPanel>
                 </StackPanel>
 
                 <!-- ── Source + Backup folders ── -->
@@ -334,7 +429,7 @@
                             <Button Classes="chip-add"
                                     Command="{Binding AddSequenceNumberCommand}"
                                     Margin="0,0,6,4">
-                                + Sequence #
+                                + Sequence
                             </Button>
                             <Button Classes="chip-add"
                                     Command="{Binding AddCurrentDateCommand}"
@@ -360,7 +455,7 @@
                                 <TextBlock Text="{Binding NamingPreview}"
                                            FontSize="12"
                                            FontWeight="Medium"
-                                           Foreground="#3B82F6"
+                                           Foreground="#1C1C1C"
                                            VerticalAlignment="Center"/>
                             </StackPanel>
                         </Border>
