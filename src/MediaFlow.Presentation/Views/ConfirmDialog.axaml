@@ -1,0 +1,46 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MediaFlow.Presentation.Views.ConfirmDialog"
+        Title="MediaFlow"
+        Width="340" Height="160"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="White">
+
+    <Window.Styles>
+        <Style Selector="Button.confirm">
+            <Setter Property="Background" Value="#DC2626"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="14,8"/>
+        </Style>
+        <Style Selector="Button.confirm:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#B91C1C"/>
+        </Style>
+        <Style Selector="Button.cancel">
+            <Setter Property="Background" Value="#EDEAE3"/>
+            <Setter Property="Foreground" Value="#1C1C1C"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="14,8"/>
+        </Style>
+    </Window.Styles>
+
+    <DockPanel Margin="24,20,24,16">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button x:Name="CancelButton" Content="Cancel" Classes="cancel"/>
+            <Button x:Name="ConfirmButton" Content="Delete" Classes="confirm"/>
+        </StackPanel>
+        <StackPanel Spacing="4">
+            <TextBlock Text="Are you sure?"
+                       FontWeight="SemiBold"
+                       FontSize="14"
+                       Foreground="#1C1C1C"/>
+            <TextBlock x:Name="MessageText"
+                       FontSize="13"
+                       Foreground="#6B7280"
+                       TextWrapping="Wrap"/>
+        </StackPanel>
+    </DockPanel>
+
+</Window>

@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using MediaFlow.Application.UseCases;
 using MediaFlow.Domain.Entities;
+using MediaFlow.Presentation.Services;
 using ReactiveUI;
 
 namespace MediaFlow.Presentation.ViewModels;
@@ -13,6 +14,7 @@ public sealed class DeviceListViewModel : ViewModelBase
 {
     private readonly GetAllDevicesUseCase _getAllDevices;
     private readonly DeleteDeviceUseCase _deleteDevice;
+    private readonly IDialogService _dialogService;
 
     public ObservableCollection<DeviceCardViewModel> Devices { get; } = [];
 
@@ -25,10 +27,11 @@ public sealed class DeviceListViewModel : ViewModelBase
     public event Action<DeviceProfile>? OpenDeviceRequested;
     public event Action<DeviceProfile>? EditDeviceRequested;
 
-    public DeviceListViewModel(GetAllDevicesUseCase getAllDevices, DeleteDeviceUseCase deleteDevice)
+    public DeviceListViewModel(GetAllDevicesUseCase getAllDevices, DeleteDeviceUseCase deleteDevice, IDialogService dialogService)
     {
         _getAllDevices = getAllDevices;
         _deleteDevice = deleteDevice;
+        _dialogService = dialogService;
 
         Devices.CollectionChanged += (_, _) => this.RaisePropertyChanged(nameof(DeviceCountText));
         AddDeviceCommand = ReactiveCommand.Create(() => AddDeviceRequested?.Invoke());
@@ -54,6 +57,9 @@ public sealed class DeviceListViewModel : ViewModelBase
 
     private async Task DeleteAsync(DeviceProfile profile)
     {
+        var confirmed = await _dialogService.ConfirmAsync($"This will permanently remove \"{profile.Name}\".");
+        if (!confirmed) return;
+
         var result = await _deleteDevice.ExecuteAsync(profile.Id);
         if (result is DeleteDeviceResult.Success)
         {
