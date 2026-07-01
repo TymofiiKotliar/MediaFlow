@@ -232,10 +232,13 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         Chips.Add(_cursor);
     }
 
+    private const string PreviewExifCaptureDate = "2004:09:01 00:00:00";
+    
+
     private void UpdatePreview()
     {
         var template = Chips.Where(c => !c.IsCursor).Select(c => c.Token!).ToList();
-        NamingPreview = _buildNaming.Execute(template, "example.jpg", null, 1);
+        NamingPreview = _buildNaming.Execute(template, "example.jpg", PreviewExifCaptureDate, 1);
     }
 
     private async Task BrowseSourceAsync()

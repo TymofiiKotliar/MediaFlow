@@ -7,6 +7,22 @@
              x:Class="MediaFlow.Presentation.Views.ProfileEditorView"
              Background="White">
 
+    <UserControl.Resources>
+        <!-- Fluent's TextBox theme sets these state colors directly on template parts
+             (Border#PART_BorderElement, Foreground on the control itself), which has higher
+             selector specificity than a plain Style targeting TextBox:pointerover/:focus.
+             Overriding the theme's own resource keys is the reliable way to recolor those states.
+             Background must be pinned too, otherwise it falls through to the Fluent theme's
+             dark-variant surface color when the OS is in dark mode (RequestedThemeVariant="Default"). -->
+        <SolidColorBrush x:Key="TextControlForeground" Color="#1C1C1C"/>
+        <SolidColorBrush x:Key="TextControlForegroundPointerOver" Color="#1C1C1C"/>
+        <SolidColorBrush x:Key="TextControlForegroundFocused" Color="#1C1C1C"/>
+        <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#B4B0A7"/>
+        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#C0BDB8"/>
+        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#DCD7CB"/>
+        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#EAE7E0"/>
+    </UserControl.Resources>
+
     <UserControl.Styles>
 
         <Style Selector="TextBlock.field-label">
@@ -25,7 +41,6 @@
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Foreground" Value="#1C1C1C"/>
         </Style>
-
         <Style Selector="Button.browse">
             <Setter Property="Background" Value="#DCD7CB"/>
             <Setter Property="Foreground" Value="#1C1C1C"/>
@@ -114,6 +129,7 @@
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Foreground" Value="#DC2626"/>
             <Setter Property="Margin" Value="0,4,0,0"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
 
     </UserControl.Styles>
