@@ -29,6 +29,8 @@ public sealed class FileSystemAdapter : IFileService
 
     public DateTime GetLastWriteTime(string path) => File.GetLastWriteTime(path);
 
+    public DateTime GetCreationTime(string path) => File.GetCreationTime(path);
+
     // ── Directory operations ──────────────────────────────────────────────────
 
     public void EnsureDirectoryExists(string path) => Directory.CreateDirectory(path);

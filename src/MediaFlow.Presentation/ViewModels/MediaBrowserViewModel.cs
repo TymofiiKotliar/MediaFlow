@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediaFlow.Application.UseCases;
@@ -46,6 +47,7 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     private bool _currentFileHasBackup;
     private bool _currentFileHasTelegram;
     private bool _currentFileHasDelete;
+    private FileRowViewModel? _selectedFile;
 
     // Raw list — all loaded files regardless of filter
     public ObservableCollection<FileRowViewModel> Files { get; } = [];
@@ -55,6 +57,12 @@ public sealed class MediaBrowserViewModel : ViewModelBase
 
     public string DeviceName => _device?.Name ?? "";
     public string SourcePath => _device?.SourceFolderPath ?? "";
+
+    public FileRowViewModel? SelectedFile
+    {
+        get => _selectedFile;
+        set => this.RaiseAndSetIfChanged(ref _selectedFile, value);
+    }
 
     public bool IsLoading
     {
@@ -216,12 +224,14 @@ public sealed class MediaBrowserViewModel : ViewModelBase
 
         var canCancel = this.WhenAnyValue(x => x.IsPipelineRunning);
 
+        var canApplyToAll = this.WhenAnyValue(x => x.SelectedFile).Select(file => file is not null);
+
         LoadMoreCommand       = ReactiveCommand.CreateFromTask(LoadBatchAsync, canLoadMore);
         BackCommand           = ReactiveCommand.Create(Back);
         ShowAllCommand        = ReactiveCommand.Create(() => SetFilter(FilterMode.All));
         ShowImagesCommand     = ReactiveCommand.Create(() => SetFilter(FilterMode.Images));
         ShowVideosCommand     = ReactiveCommand.Create(() => SetFilter(FilterMode.Videos));
-        ApplyToAllCommand     = ReactiveCommand.Create(() => { });
+        ApplyToAllCommand     = ReactiveCommand.Create(ApplyToAll, canApplyToAll);
         RunPipelineCommand    = ReactiveCommand.CreateFromTask(RunPipelineAsync, canRunPipeline);
         CancelPipelineCommand = ReactiveCommand.Create(CancelPipeline, canCancel);
         DismissSummaryCommand = ReactiveCommand.Create(DismissSummary);
@@ -240,6 +250,7 @@ public sealed class MediaBrowserViewModel : ViewModelBase
         _filterMode = FilterMode.All;
         HasMore = true;
         LoadError = null;
+        SelectedFile = null;
         Files.Clear();
         FilteredFiles.Clear();
 
@@ -256,6 +267,23 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     {
         _cts.Cancel();
         BackRequested?.Invoke();
+    }
+
+    private void ApplyToAll()
+    {
+        if (_selectedFile is null) return;
+
+        foreach (var row in Files)
+        {
+            if (ReferenceEquals(row, _selectedFile)) continue;
+
+            row.ShouldRotateLeft     = _selectedFile.ShouldRotateLeft;
+            row.ShouldRotateRight    = _selectedFile.ShouldRotateRight;
+            row.ShouldFlip           = _selectedFile.ShouldFlip;
+            row.ShouldBackup         = _selectedFile.ShouldBackup;
+            row.ShouldSendToTelegram = _selectedFile.ShouldSendToTelegram;
+            row.ShouldDelete         = _selectedFile.ShouldDelete;
+        }
     }
 
     private static SortMode NextSortMode(SortMode current) => current switch

@@ -50,7 +50,8 @@ public sealed class MediaLoaderAdapter(
                 TempPath: tempPath,
                 Type: isImage ? FileType.Image : FileType.Video,
                 AssignedActions: MediaAction.None,
-                ExifCaptureDate: meta.CaptureDate));
+                ExifCaptureDate: meta.CaptureDate,
+                CreatedDate: fs.GetCreationTime(sourcePath)));
         }
 
         return result;
