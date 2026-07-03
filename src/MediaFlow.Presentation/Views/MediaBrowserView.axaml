@@ -49,6 +49,14 @@
 
     <UserControl.Styles>
 
+        <!-- Fluent's CheckBox template reserves an 8px content margin (via its default Padding)
+             next to the 20px glyph column even when there's no Content, which shifts the glyph
+             left of center once the control is horizontally centered in its grid column. These
+             checkboxes never carry a label, so drop the padding to center the glyph exactly. -->
+        <Style Selector="CheckBox">
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
         <!-- ── Filter toggle buttons (All / Images / Videos) ── -->
         <Style Selector="Button.filter">
             <Setter Property="Background" Value="White"/>
@@ -331,27 +339,24 @@
                            Margin="0,6"/>
 
                 <!-- Action column labels -->
-                <TextBlock Grid.Column="7"
-                           Text="BKP"
-                           FontSize="10"
-                           FontWeight="SemiBold"
-                           Foreground="#A09D97"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="8"
-                           Text="TG"
-                           FontSize="10"
-                           FontWeight="SemiBold"
-                           Foreground="#A09D97"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="9"
-                           Text="DEL"
-                           FontSize="10"
-                           FontWeight="SemiBold"
-                           Foreground="#DC2626"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
+                <Image Grid.Column="7"
+                       Source="avares://MediaFlow.Presentation/Assets/UI-Icons/folder.png"
+                       Width="20" Height="20"
+                       RenderOptions.BitmapInterpolationMode="HighQuality"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+                <Image Grid.Column="8"
+                       Source="avares://MediaFlow.Presentation/Assets/UI-Icons/tg.png"
+                       Width="20" Height="20"
+                       RenderOptions.BitmapInterpolationMode="HighQuality"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+                <Image Grid.Column="9"
+                       Source="avares://MediaFlow.Presentation/Assets/UI-Icons/bin-red.png"
+                       Width="20" Height="20"
+                       RenderOptions.BitmapInterpolationMode="HighQuality"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
             </Grid>
         </Border>
 
