@@ -136,7 +136,7 @@ public sealed class MediaBrowserViewModel : ViewModelBase
 
     public bool HasSummary         => _lastRunSummary is not null;
     public bool SummaryHasFailures => _lastRunSummary?.Failed > 0;
-    public string SummaryTitle     => _wasRunCancelled ? "Pipeline cancelled" : "Pipeline complete";
+    public string SummaryTitle     => _wasRunCancelled ? "Pipeline cancelled" : "Pipeline complete!";
 
     public bool CurrentFileIsVideo
     {

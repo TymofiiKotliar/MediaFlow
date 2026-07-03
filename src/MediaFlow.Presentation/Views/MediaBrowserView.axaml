@@ -137,11 +137,6 @@
             <Setter Property="Foreground" Value="#706E69"/>
         </Style>
 
-        <!-- ── Danger text (failed count in summary) ── -->
-        <Style Selector="TextBlock.danger">
-            <Setter Property="Foreground" Value="#DC2626"/>
-        </Style>
-
         <!-- ── Stage pills inside the progress overlay ── -->
         <Style Selector="Border.stage-pill">
             <Setter Property="CornerRadius" Value="4"/>
@@ -152,6 +147,21 @@
         <Style Selector="Border.stage-pill-danger">
             <Setter Property="Background" Value="#FEE2E2"/>
             <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
+        <!-- ── Summary stat tile (pipeline complete overlay) ── -->
+        <Style Selector="Border.summary-stat">
+            <Setter Property="Background" Value="#F5F3EF"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="12,16"/>
+        </Style>
+
+        <!-- ── Summary OK button ── -->
+        <Style Selector="Button.summary-ok">
+            <Setter Property="Background" Value="#1C1C1C"/>
+        </Style>
+        <Style Selector="Button.summary-ok:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#333333"/>
         </Style>
 
         <!-- ── File row ── -->
@@ -644,73 +654,88 @@
          ════════════════════════════════════════════ -->
     <Border IsVisible="{Binding HasSummary}"
             Background="#99000000">
-        <Border Background="#EDECEA"
-                CornerRadius="10"
+        <Border Background="White"
+                BorderBrush="#E8E5DF"
+                BorderThickness="1"
+                CornerRadius="14"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Width="460"
-                BoxShadow="0 8 40 0 #33000000">
-            <StackPanel Margin="28,24">
+                BoxShadow="0 12 32 0 #26000000">
+            <StackPanel Margin="32,28">
 
                 <!-- Title -->
                 <TextBlock Text="{Binding SummaryTitle}"
-                           FontSize="17"
+                           FontSize="18"
                            FontWeight="Bold"
                            Foreground="#1C1C1C"
-                           Margin="0,0,0,20"/>
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding PipelineSubtitle}"
+                           FontSize="12"
+                           Foreground="#A09D97"
+                           HorizontalAlignment="Center"
+                           Margin="0,4,0,24"/>
 
                 <!-- Stats -->
-                <Grid ColumnDefinitions="*,Auto"
-                      RowDefinitions="Auto,Auto,Auto,Auto,Auto"
-                      Margin="0,0,0,20">
+                <Grid ColumnDefinitions="*,*,*" Margin="0,0,0,20">
 
-                    <TextBlock Grid.Row="0" Grid.Column="0"
-                               Text="Backed up"
-                               FontSize="13" Foreground="#706E69" Margin="0,0,0,10"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1"
-                               Text="{Binding LastRunSummary.BackedUp}"
-                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"/>
+                    <Border Grid.Column="0" Classes="summary-stat" Margin="0,0,6,0">
+                        <StackPanel HorizontalAlignment="Center" Spacing="8">
+                            <Image Source="avares://MediaFlow.Presentation/Assets/UI-Icons/folder.png"
+                                   Width="24" Height="24"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality"
+                                   HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding LastRunSummary.BackedUp}"
+                                       FontSize="22" FontWeight="Bold" Foreground="#1C1C1C"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Backed up"
+                                       FontSize="11" Foreground="#706E69"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
 
-                    <TextBlock Grid.Row="1" Grid.Column="0"
-                               Text="Sent to Telegram"
-                               FontSize="13" Foreground="#706E69" Margin="0,0,0,10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="1"
-                               Text="{Binding LastRunSummary.SentToTelegram}"
-                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"/>
+                    <Border Grid.Column="1" Classes="summary-stat" Margin="3,0">
+                        <StackPanel HorizontalAlignment="Center" Spacing="8">
+                            <Image Source="avares://MediaFlow.Presentation/Assets/UI-Icons/tg.png"
+                                   Width="24" Height="24"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality"
+                                   HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding LastRunSummary.SentToTelegram}"
+                                       FontSize="22" FontWeight="Bold" Foreground="#1C1C1C"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Telegram"
+                                       FontSize="11" Foreground="#706E69"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0"
-                               Text="Deleted"
-                               FontSize="13" Foreground="#706E69" Margin="0,0,0,10"/>
-                    <TextBlock Grid.Row="2" Grid.Column="1"
-                               Text="{Binding LastRunSummary.Deleted}"
-                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"/>
+                    <Border Grid.Column="2" Classes="summary-stat" Margin="6,0,0,0">
+                        <StackPanel HorizontalAlignment="Center" Spacing="8">
+                            <Image Source="avares://MediaFlow.Presentation/Assets/UI-Icons/bin-red.png"
+                                   Width="24" Height="24"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality"
+                                   HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding LastRunSummary.Deleted}"
+                                       FontSize="22" FontWeight="Bold" Foreground="#1C1C1C"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Deleted"
+                                       FontSize="11" Foreground="#706E69"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
 
-                    <TextBlock Grid.Row="3" Grid.Column="0"
-                               Text="Duplicates skipped"
-                               FontSize="13" Foreground="#706E69" Margin="0,0,0,10"/>
-                    <TextBlock Grid.Row="3" Grid.Column="1"
-                               Text="{Binding LastRunSummary.DuplicatesSkipped}"
-                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"/>
-
-                    <TextBlock Grid.Row="4" Grid.Column="0"
-                               Text="Failed"
-                               FontSize="13" Foreground="#706E69"/>
-                    <TextBlock Grid.Row="4" Grid.Column="1"
-                               Text="{Binding LastRunSummary.Failed}"
-                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"
-                               Classes.danger="{Binding SummaryHasFailures}"/>
                 </Grid>
 
-                <!-- Failed files list (only when there are failures) -->
+                <!-- Failed files (only when there are failures) -->
                 <StackPanel IsVisible="{Binding SummaryHasFailures}"
                             Margin="0,0,0,20">
                     <TextBlock Text="FAILED FILES"
                                FontSize="10"
                                FontWeight="SemiBold"
-                               Foreground="#A09D97"
+                               Foreground="#DC2626"
                                Margin="0,0,0,8"/>
-                    <Border Background="#F5F3EF"
-                            CornerRadius="6"
+                    <Border Background="#FEF2F2"
+                            CornerRadius="8"
                             Padding="12">
                         <ScrollViewer MaxHeight="130">
                             <ItemsControl ItemsSource="{Binding LastRunSummary.FailedFiles}">
@@ -734,13 +759,14 @@
                 </StackPanel>
 
                 <!-- OK button -->
-                <Button Command="{Binding DismissSummaryCommand}"
-                        HorizontalAlignment="Center"
-                        Padding="32,9"
-                        Background="#1C1C1C"
+                <Button Classes="summary-ok"
+                        Command="{Binding DismissSummaryCommand}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Padding="0,11"
                         Foreground="White"
                         BorderThickness="0"
-                        CornerRadius="6"
+                        CornerRadius="8"
                         FontSize="13"
                         FontWeight="Medium">
                     OK
