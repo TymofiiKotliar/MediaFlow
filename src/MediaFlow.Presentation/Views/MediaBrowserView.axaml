@@ -7,6 +7,28 @@
              x:Class="MediaFlow.Presentation.Views.MediaBrowserView"
              Background="White">
 
+    <UserControl.Resources>
+        <!-- Fluent's CheckBox theme draws the box/glyph from these resource keys rather than
+             from BorderBrush/Background setters, and falls back to the dark-variant palette
+             when the OS is in dark mode (RequestedThemeVariant="Default"), which is invisible
+             against this view's pinned white background. Pin the brushes explicitly instead. -->
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUnchecked" Color="White"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUnchecked" Color="#A09D97"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUncheckedPointerOver" Color="#F5F3EF"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUncheckedPointerOver" Color="#706E69"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUncheckedPressed" Color="#EDEAE3"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUncheckedPressed" Color="#1C1C1C"/>
+
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="#1C1C1C"/>
+        <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="White"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="#333333"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPointerOver" Color="#333333"/>
+        <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="White"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="#000000"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPressed" Color="#000000"/>
+        <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPressed" Color="White"/>
+    </UserControl.Resources>
+
     <UserControl.Styles>
 
         <!-- ── Filter toggle buttons (All / Images / Videos) ── -->
