@@ -44,7 +44,9 @@ public sealed class FileSystemAdapter : IFileService
         return Directory.EnumerateFiles(folderPath)
             .Where(f => MediaExtensions.Contains(
                 Path.GetExtension(f).ToLowerInvariant()))
-            .OrderBy(f => Path.GetFileName(f), StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(File.GetCreationTime)
+            .ThenByDescending(File.GetLastWriteTime)
+            .ThenBy(f => Path.GetFileName(f), StringComparer.OrdinalIgnoreCase)
             .Skip(offset)
             .Take(limit)
             .ToList();
