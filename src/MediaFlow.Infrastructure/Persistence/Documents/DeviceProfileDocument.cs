@@ -10,4 +10,6 @@ internal sealed class DeviceProfileDocument
     public string TelegramBotToken { get; set; } = "";
     public string TelegramChatId { get; set; } = "";
     public int FilesPerLoad { get; set; }
+    public string? ProfilePicturePath { get; set; }
+    public string ProfilePictureFitMode { get; set; } = "Crop";
 }

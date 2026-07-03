@@ -30,6 +30,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IMetadataReader>(sp => sp.GetRequiredService<MetadataAdapter>());
 
         services.AddSingleton<IDeviceRepository, DeviceRepositoryAdapter>();
+        services.AddSingleton<IDeviceProfilePictureStore, DeviceProfilePictureStore>();
         services.AddSingleton<IThumbnailService, ThumbnailService>();
         services.AddSingleton<HttpClient>();
 

@@ -9,9 +9,10 @@ namespace MediaFlow.Application.Tests.UseCases;
 public class DeleteDeviceUseCaseTests
 {
     private readonly IDeviceRepository _repository = Substitute.For<IDeviceRepository>();
+    private readonly IDeviceProfilePictureStore _pictureStore = Substitute.For<IDeviceProfilePictureStore>();
     private readonly DeleteDeviceUseCase _sut;
 
-    public DeleteDeviceUseCaseTests() => _sut = new DeleteDeviceUseCase(_repository);
+    public DeleteDeviceUseCaseTests() => _sut = new DeleteDeviceUseCase(_repository, _pictureStore);
 
     [Fact]
     public async Task ExecuteAsync_ExistingProfile_ReturnsSuccess()

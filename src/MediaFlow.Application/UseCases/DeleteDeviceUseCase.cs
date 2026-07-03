@@ -2,7 +2,7 @@ using MediaFlow.Domain.Interfaces;
 
 namespace MediaFlow.Application.UseCases;
 
-public sealed class DeleteDeviceUseCase(IDeviceRepository repository)
+public sealed class DeleteDeviceUseCase(IDeviceRepository repository, IDeviceProfilePictureStore pictureStore)
 {
     public async Task<DeleteDeviceResult> ExecuteAsync(string id, CancellationToken ct = default)
     {
@@ -11,6 +11,10 @@ public sealed class DeleteDeviceUseCase(IDeviceRepository repository)
             return new DeleteDeviceResult.NotFound(id);
 
         await repository.DeleteAsync(id, ct);
+
+        if (existing.ProfilePicturePath is not null)
+            pictureStore.Delete(existing.ProfilePicturePath);
+
         return new DeleteDeviceResult.Success();
     }
 }

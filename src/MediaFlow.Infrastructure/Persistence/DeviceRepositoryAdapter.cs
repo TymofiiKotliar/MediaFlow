@@ -1,5 +1,6 @@
 using LiteDB;
 using MediaFlow.Domain.Entities;
+using MediaFlow.Domain.Enums;
 using MediaFlow.Domain.Interfaces;
 using MediaFlow.Domain.ValueObjects;
 using MediaFlow.Infrastructure.Persistence.Documents;
@@ -55,7 +56,9 @@ public sealed class DeviceRepositoryAdapter : IDeviceRepository
         NamingTemplate = p.NamingTemplate.Select(ToDocument).ToList(),
         TelegramBotToken = p.TelegramBotToken,
         TelegramChatId = p.TelegramChatId,
-        FilesPerLoad = p.FilesPerLoad
+        FilesPerLoad = p.FilesPerLoad,
+        ProfilePicturePath = p.ProfilePicturePath,
+        ProfilePictureFitMode = p.ProfilePictureFitMode.ToString()
     };
 
     private static NamingTokenDocument ToDocument(NamingToken token) => token switch
@@ -77,7 +80,11 @@ public sealed class DeviceRepositoryAdapter : IDeviceRepository
         NamingTemplate:   d.NamingTemplate.Select(ToDomain).ToList(),
         TelegramBotToken: d.TelegramBotToken,
         TelegramChatId:   d.TelegramChatId,
-        FilesPerLoad:     d.FilesPerLoad);
+        FilesPerLoad:     d.FilesPerLoad,
+        ProfilePicturePath: d.ProfilePicturePath,
+        ProfilePictureFitMode: Enum.TryParse<ProfilePictureFitMode>(d.ProfilePictureFitMode, out var fitMode)
+            ? fitMode
+            : ProfilePictureFitMode.Crop);
 
     private static NamingToken ToDomain(NamingTokenDocument d) => d.Type switch
     {
