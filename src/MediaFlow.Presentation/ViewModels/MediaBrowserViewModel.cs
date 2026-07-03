@@ -426,6 +426,22 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     {
         _wasRunCancelled = false;
         LastRunSummary = null;
+        RefreshFileList();
+    }
+
+    private void RefreshFileList()
+    {
+        _cts.Cancel();
+        _cts = new CancellationTokenSource();
+
+        _offset = 0;
+        HasMore = true;
+        LoadError = null;
+        SelectedFile = null;
+        Files.Clear();
+        FilteredFiles.Clear();
+
+        _ = LoadBatchAsync();
     }
 
     private async Task LoadBatchAsync()
