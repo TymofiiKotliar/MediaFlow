@@ -61,6 +61,7 @@
         </Style>
         <Style Selector="Button.filter:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#F5F3EF"/>
+            <Setter Property="Foreground" Value="#3A3835"/>
         </Style>
         <Style Selector="Button.filter.active">
             <Setter Property="Background" Value="#E8E5DF"/>
@@ -68,6 +69,7 @@
         </Style>
         <Style Selector="Button.filter.active:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#DEDBD3"/>
+            <Setter Property="Foreground" Value="#3A3835"/>
         </Style>
 
         <!-- ── Sort button (Date ▾) ── -->
@@ -82,6 +84,7 @@
         </Style>
         <Style Selector="Button.sort:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#F5F3EF"/>
+            <Setter Property="Foreground" Value="#3A3835"/>
         </Style>
 
         <!-- ── Primary button (Run Pipeline) ── -->
@@ -109,6 +112,7 @@
         </Style>
         <Style Selector="Button.secondary:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#DEDBD3"/>
+            <Setter Property="Foreground" Value="#1C1C1C"/>
         </Style>
 
         <!-- ── Ghost button (Load more →, Back link) ── -->
