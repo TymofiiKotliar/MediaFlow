@@ -7,7 +7,55 @@
              x:Class="MediaFlow.Presentation.Views.MediaBrowserView"
              Background="White">
 
+    <UserControl.Resources>
+        <!-- Fluent's CheckBox theme draws the box/glyph from these resource keys rather than
+             from BorderBrush/Background setters, and falls back to the dark-variant palette
+             when the OS is in dark mode (RequestedThemeVariant="Default"), which is invisible
+             against this view's pinned white background. Pin the brushes explicitly instead. -->
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUnchecked" Color="White"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUnchecked" Color="#A09D97"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUncheckedPointerOver" Color="#F5F3EF"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUncheckedPointerOver" Color="#706E69"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUncheckedPressed" Color="#EDEAE3"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeUncheckedPressed" Color="#1C1C1C"/>
+
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="#1C1C1C"/>
+        <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="White"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="#333333"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPointerOver" Color="#333333"/>
+        <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="White"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="#000000"/>
+        <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPressed" Color="#000000"/>
+        <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPressed" Color="White"/>
+
+        <!-- Fluent's ListBoxItem paints its own pointerover/selected chrome from these keys,
+             which would otherwise show through/clash with the file row's own Border-based
+             hover and selected styling below. Neutralize them so the row's own Border drives
+             every visual state instead. -->
+        <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
+        <SolidColorBrush x:Key="SystemControlHighlightListMediumBrush" Color="Transparent"/>
+        <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
+        <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumBrush" Color="Transparent"/>
+        <SolidColorBrush x:Key="SystemControlHighlightListAccentHighBrush" Color="Transparent"/>
+        <SolidColorBrush x:Key="SystemControlHighlightAltBaseHighBrush" Color="#1C1C1C"/>
+
+        <!-- Fluent's Button theme draws the disabled state from these keys (e.g. Apply to all
+             while no row is selected, Load more once exhausted) and falls back to the dark-variant
+             palette in dark mode, which is invisible against this view's pinned white background. -->
+        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#F5F3EF"/>
+        <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#F5F3EF"/>
+        <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="#A09D97"/>
+    </UserControl.Resources>
+
     <UserControl.Styles>
+
+        <!-- Fluent's CheckBox template reserves an 8px content margin (via its default Padding)
+             next to the 20px glyph column even when there's no Content, which shifts the glyph
+             left of center once the control is horizontally centered in its grid column. These
+             checkboxes never carry a label, so drop the padding to center the glyph exactly. -->
+        <Style Selector="CheckBox">
+            <Setter Property="Padding" Value="0"/>
+        </Style>
 
         <!-- ── Filter toggle buttons (All / Images / Videos) ── -->
         <Style Selector="Button.filter">
@@ -21,6 +69,7 @@
         </Style>
         <Style Selector="Button.filter:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#F5F3EF"/>
+            <Setter Property="Foreground" Value="#3A3835"/>
         </Style>
         <Style Selector="Button.filter.active">
             <Setter Property="Background" Value="#E8E5DF"/>
@@ -28,6 +77,7 @@
         </Style>
         <Style Selector="Button.filter.active:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#DEDBD3"/>
+            <Setter Property="Foreground" Value="#3A3835"/>
         </Style>
 
         <!-- ── Sort button (Date ▾) ── -->
@@ -42,6 +92,7 @@
         </Style>
         <Style Selector="Button.sort:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#F5F3EF"/>
+            <Setter Property="Foreground" Value="#3A3835"/>
         </Style>
 
         <!-- ── Primary button (Run Pipeline) ── -->
@@ -69,26 +120,21 @@
         </Style>
         <Style Selector="Button.secondary:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#DEDBD3"/>
+            <Setter Property="Foreground" Value="#1C1C1C"/>
         </Style>
 
         <!-- ── Ghost button (Load more →, Back link) ── -->
         <Style Selector="Button.ghost">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="5"/>
             <Setter Property="Foreground" Value="#706E69"/>
             <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Padding" Value="8,4"/>
         </Style>
         <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="Transparent"/>
-        </Style>
-        <Style Selector="Button.ghost:pointerover">
-            <Setter Property="Foreground" Value="#1C1C1C"/>
-        </Style>
-
-        <!-- ── Danger text (failed count in summary) ── -->
-        <Style Selector="TextBlock.danger">
-            <Setter Property="Foreground" Value="#DC2626"/>
+            <Setter Property="Background" Value="#DDDAD4"/>
+            <Setter Property="Foreground" Value="#706E69"/>
         </Style>
 
         <!-- ── Stage pills inside the progress overlay ── -->
@@ -103,7 +149,34 @@
             <Setter Property="Margin" Value="0,0,0,6"/>
         </Style>
 
+        <!-- ── Summary stat tile (pipeline complete overlay) ── -->
+        <Style Selector="Border.summary-stat">
+            <Setter Property="Background" Value="#F5F3EF"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="12,16"/>
+        </Style>
+
+        <!-- ── Summary OK button ── -->
+        <Style Selector="Button.summary-ok">
+            <Setter Property="Background" Value="#1C1C1C"/>
+        </Style>
+        <Style Selector="Button.summary-ok:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#333333"/>
+        </Style>
+
         <!-- ── File row ── -->
+        <!-- The file list is a ListBox so a row can be picked as the "current" one for
+             Apply to all; strip its container chrome so only the Border below paints. -->
+        <Style Selector="ListBox.file-list">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+        </Style>
         <Style Selector="Border.file-row">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#F0EDE8"/>
@@ -119,6 +192,13 @@
         </Style>
         <Style Selector="Border.file-row.has-actions:pointerover">
             <Setter Property="Background" Value="#F5F3EF"/>
+        </Style>
+        <!-- Row picked as the "current" one for Apply to all -->
+        <Style Selector="ListBoxItem:selected Border.file-row">
+            <Setter Property="Background" Value="#E8E5DF"/>
+        </Style>
+        <Style Selector="ListBoxItem:selected:pointerover Border.file-row">
+            <Setter Property="Background" Value="#DEDBD3"/>
         </Style>
 
     </UserControl.Styles>
@@ -156,13 +236,6 @@
                                Foreground="#1C1C1C"/>
                 </StackPanel>
 
-                <!-- Source path (right-aligned, bottom-aligned with title) -->
-                <TextBlock Grid.Column="1"
-                           Text="{Binding SourcePath}"
-                           FontSize="12"
-                           Foreground="#A09D97"
-                           VerticalAlignment="Bottom"
-                           Margin="0,0,0,2"/>
             </Grid>
         </Border>
 
@@ -276,27 +349,24 @@
                            Margin="0,6"/>
 
                 <!-- Action column labels -->
-                <TextBlock Grid.Column="7"
-                           Text="BKP"
-                           FontSize="10"
-                           FontWeight="SemiBold"
-                           Foreground="#A09D97"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="8"
-                           Text="TG"
-                           FontSize="10"
-                           FontWeight="SemiBold"
-                           Foreground="#A09D97"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="9"
-                           Text="DEL"
-                           FontSize="10"
-                           FontWeight="SemiBold"
-                           Foreground="#DC2626"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
+                <Image Grid.Column="7"
+                       Source="avares://MediaFlow.Presentation/Assets/UI-Icons/folder.png"
+                       Width="20" Height="20"
+                       RenderOptions.BitmapInterpolationMode="HighQuality"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+                <Image Grid.Column="8"
+                       Source="avares://MediaFlow.Presentation/Assets/UI-Icons/tg.png"
+                       Width="20" Height="20"
+                       RenderOptions.BitmapInterpolationMode="HighQuality"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+                <Image Grid.Column="9"
+                       Source="avares://MediaFlow.Presentation/Assets/UI-Icons/bin-red.png"
+                       Width="20" Height="20"
+                       RenderOptions.BitmapInterpolationMode="HighQuality"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
             </Grid>
         </Border>
 
@@ -327,9 +397,11 @@
              File list (main scrollable area)
              ════════════════════════════════════════════ -->
         <Grid>
-            <ScrollViewer>
-                <ItemsControl ItemsSource="{Binding FilteredFiles}">
-                    <ItemsControl.ItemTemplate>
+            <ListBox Classes="file-list"
+                     ItemsSource="{Binding FilteredFiles}"
+                     SelectedItem="{Binding SelectedFile, Mode=TwoWay}"
+                     SelectionMode="Single">
+                    <ListBox.ItemTemplate>
                         <DataTemplate>
 
                             <!-- One file row -->
@@ -382,6 +454,9 @@
                                         <TextBlock Text="{Binding MetaText}"
                                                    FontSize="11"
                                                    Foreground="#A09D97"/>
+                                        <TextBlock Text="{Binding CreatedDateText}"
+                                                   FontSize="11"
+                                                   Foreground="#A09D97"/>
                                     </StackPanel>
 
                                     <!-- Rotate Left -->
@@ -432,9 +507,8 @@
                             </Border>
 
                         </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+                    </ListBox.ItemTemplate>
+            </ListBox>
 
             <!-- Loading banner (overlays top of list while fetching) -->
             <Border IsVisible="{Binding IsLoading}"
@@ -580,73 +654,88 @@
          ════════════════════════════════════════════ -->
     <Border IsVisible="{Binding HasSummary}"
             Background="#99000000">
-        <Border Background="#EDECEA"
-                CornerRadius="10"
+        <Border Background="White"
+                BorderBrush="#E8E5DF"
+                BorderThickness="1"
+                CornerRadius="14"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Width="460"
-                BoxShadow="0 8 40 0 #33000000">
-            <StackPanel Margin="28,24">
+                BoxShadow="0 12 32 0 #26000000">
+            <StackPanel Margin="32,28">
 
                 <!-- Title -->
                 <TextBlock Text="{Binding SummaryTitle}"
-                           FontSize="17"
+                           FontSize="18"
                            FontWeight="Bold"
                            Foreground="#1C1C1C"
-                           Margin="0,0,0,20"/>
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding PipelineSubtitle}"
+                           FontSize="12"
+                           Foreground="#A09D97"
+                           HorizontalAlignment="Center"
+                           Margin="0,4,0,24"/>
 
                 <!-- Stats -->
-                <Grid ColumnDefinitions="*,Auto"
-                      RowDefinitions="Auto,Auto,Auto,Auto,Auto"
-                      Margin="0,0,0,20">
+                <Grid ColumnDefinitions="*,*,*" Margin="0,0,0,20">
 
-                    <TextBlock Grid.Row="0" Grid.Column="0"
-                               Text="Backed up"
-                               FontSize="13" Foreground="#706E69" Margin="0,0,0,10"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1"
-                               Text="{Binding LastRunSummary.BackedUp}"
-                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"/>
+                    <Border Grid.Column="0" Classes="summary-stat" Margin="0,0,6,0">
+                        <StackPanel HorizontalAlignment="Center" Spacing="8">
+                            <Image Source="avares://MediaFlow.Presentation/Assets/UI-Icons/folder.png"
+                                   Width="24" Height="24"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality"
+                                   HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding LastRunSummary.BackedUp}"
+                                       FontSize="22" FontWeight="Bold" Foreground="#1C1C1C"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Backed up"
+                                       FontSize="11" Foreground="#706E69"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
 
-                    <TextBlock Grid.Row="1" Grid.Column="0"
-                               Text="Sent to Telegram"
-                               FontSize="13" Foreground="#706E69" Margin="0,0,0,10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="1"
-                               Text="{Binding LastRunSummary.SentToTelegram}"
-                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"/>
+                    <Border Grid.Column="1" Classes="summary-stat" Margin="3,0">
+                        <StackPanel HorizontalAlignment="Center" Spacing="8">
+                            <Image Source="avares://MediaFlow.Presentation/Assets/UI-Icons/tg.png"
+                                   Width="24" Height="24"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality"
+                                   HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding LastRunSummary.SentToTelegram}"
+                                       FontSize="22" FontWeight="Bold" Foreground="#1C1C1C"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Telegram"
+                                       FontSize="11" Foreground="#706E69"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0"
-                               Text="Deleted"
-                               FontSize="13" Foreground="#706E69" Margin="0,0,0,10"/>
-                    <TextBlock Grid.Row="2" Grid.Column="1"
-                               Text="{Binding LastRunSummary.Deleted}"
-                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"/>
+                    <Border Grid.Column="2" Classes="summary-stat" Margin="6,0,0,0">
+                        <StackPanel HorizontalAlignment="Center" Spacing="8">
+                            <Image Source="avares://MediaFlow.Presentation/Assets/UI-Icons/bin-red.png"
+                                   Width="24" Height="24"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality"
+                                   HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding LastRunSummary.Deleted}"
+                                       FontSize="22" FontWeight="Bold" Foreground="#1C1C1C"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Deleted"
+                                       FontSize="11" Foreground="#706E69"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
 
-                    <TextBlock Grid.Row="3" Grid.Column="0"
-                               Text="Duplicates skipped"
-                               FontSize="13" Foreground="#706E69" Margin="0,0,0,10"/>
-                    <TextBlock Grid.Row="3" Grid.Column="1"
-                               Text="{Binding LastRunSummary.DuplicatesSkipped}"
-                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"/>
-
-                    <TextBlock Grid.Row="4" Grid.Column="0"
-                               Text="Failed"
-                               FontSize="13" Foreground="#706E69"/>
-                    <TextBlock Grid.Row="4" Grid.Column="1"
-                               Text="{Binding LastRunSummary.Failed}"
-                               FontSize="13" FontWeight="Medium" Foreground="#1C1C1C"
-                               Classes.danger="{Binding SummaryHasFailures}"/>
                 </Grid>
 
-                <!-- Failed files list (only when there are failures) -->
+                <!-- Failed files (only when there are failures) -->
                 <StackPanel IsVisible="{Binding SummaryHasFailures}"
                             Margin="0,0,0,20">
                     <TextBlock Text="FAILED FILES"
                                FontSize="10"
                                FontWeight="SemiBold"
-                               Foreground="#A09D97"
+                               Foreground="#DC2626"
                                Margin="0,0,0,8"/>
-                    <Border Background="#F5F3EF"
-                            CornerRadius="6"
+                    <Border Background="#FEF2F2"
+                            CornerRadius="8"
                             Padding="12">
                         <ScrollViewer MaxHeight="130">
                             <ItemsControl ItemsSource="{Binding LastRunSummary.FailedFiles}">
@@ -670,13 +759,14 @@
                 </StackPanel>
 
                 <!-- OK button -->
-                <Button Command="{Binding DismissSummaryCommand}"
-                        HorizontalAlignment="Center"
-                        Padding="32,9"
-                        Background="#1C1C1C"
+                <Button Classes="summary-ok"
+                        Command="{Binding DismissSummaryCommand}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Padding="0,11"
                         Foreground="White"
                         BorderThickness="0"
-                        CornerRadius="6"
+                        CornerRadius="8"
                         FontSize="13"
                         FontWeight="Medium">
                     OK

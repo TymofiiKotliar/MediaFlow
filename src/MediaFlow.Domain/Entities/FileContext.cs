@@ -8,5 +8,6 @@ public sealed record FileContext(
     string TempPath,
     FileType Type,
     MediaAction AssignedActions,
-    string? ExifCaptureDate
+    string? ExifCaptureDate,
+    DateTime CreatedDate = default
 );

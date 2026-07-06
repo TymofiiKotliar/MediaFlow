@@ -28,6 +28,7 @@ public sealed class FileRowViewModel : ViewModelBase
     public long FileSize { get; }
     public string FileSizeText { get; }
     public string CaptureDate { get; }
+    public string CreatedDateText { get; }
     public string MetaText { get; }
     public string FileExtension { get; }
 
@@ -105,6 +106,7 @@ public sealed class FileRowViewModel : ViewModelBase
         CaptureDate = context.ExifCaptureDate is not null
             ? FormatExifDate(context.ExifCaptureDate)
             : "";
+        CreatedDateText = $"{context.CreatedDate:dd.MM.yyyy}";
         MetaText = CaptureDate.Length > 0
             ? $"{FileSizeText} · {CaptureDate}"
             : FileSizeText;

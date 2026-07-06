@@ -29,6 +29,8 @@ public sealed class FileSystemAdapter : IFileService
 
     public DateTime GetLastWriteTime(string path) => File.GetLastWriteTime(path);
 
+    public DateTime GetCreationTime(string path) => File.GetCreationTime(path);
+
     // ── Directory operations ──────────────────────────────────────────────────
 
     public void EnsureDirectoryExists(string path) => Directory.CreateDirectory(path);
@@ -44,7 +46,9 @@ public sealed class FileSystemAdapter : IFileService
         return Directory.EnumerateFiles(folderPath)
             .Where(f => MediaExtensions.Contains(
                 Path.GetExtension(f).ToLowerInvariant()))
-            .OrderBy(f => Path.GetFileName(f), StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(File.GetCreationTime)
+            .ThenByDescending(File.GetLastWriteTime)
+            .ThenBy(f => Path.GetFileName(f), StringComparer.OrdinalIgnoreCase)
             .Skip(offset)
             .Take(limit)
             .ToList();
