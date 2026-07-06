@@ -155,7 +155,10 @@ public sealed class FileSystemAdapterTests : IDisposable
     [Fact]
     public void ListMediaFiles_RespectsOffset()
     {
-        TempFile("a.jpg"); TempFile("b.jpg"); TempFile("c.jpg");
+        var now = DateTime.Now;
+        SetTimes(TempFile("a.jpg"), now.AddMinutes(-2));
+        SetTimes(TempFile("b.jpg"), now.AddMinutes(-1));
+        SetTimes(TempFile("c.jpg"), now);
 
         var result = _sut.ListMediaFiles(_root, offset: 1, limit: 100);
 
@@ -174,14 +177,52 @@ public sealed class FileSystemAdapterTests : IDisposable
     }
 
     [Fact]
-    public void ListMediaFiles_SortedAlphabetically()
+    public void ListMediaFiles_SortsByCreationDateDescending()
     {
-        TempFile("c.jpg"); TempFile("a.jpg"); TempFile("b.jpg");
+        var now = DateTime.Now;
+        SetTimes(TempFile("a.jpg"), now.AddMinutes(-2));
+        SetTimes(TempFile("b.jpg"), now.AddMinutes(-1));
+        SetTimes(TempFile("c.jpg"), now);
 
         var result = _sut.ListMediaFiles(_root, offset: 0, limit: 100);
 
         result.Select(Path.GetFileName)
-            .Should().ContainInOrder("a.jpg", "b.jpg", "c.jpg");
+            .Should().ContainInOrder("c.jpg", "b.jpg", "a.jpg");
+    }
+
+    [Fact]
+    public void ListMediaFiles_SameCreationDate_FallsBackToModifiedDateDescending()
+    {
+        var created = DateTime.Now.AddDays(-1);
+        var a = TempFile("a.jpg"); var b = TempFile("b.jpg");
+        File.SetCreationTime(a, created);
+        File.SetCreationTime(b, created);
+        File.SetLastWriteTime(a, created.AddMinutes(-1));
+        File.SetLastWriteTime(b, created);
+
+        var result = _sut.ListMediaFiles(_root, offset: 0, limit: 100);
+
+        result.Select(Path.GetFileName)
+            .Should().ContainInOrder("b.jpg", "a.jpg");
+    }
+
+    [Fact]
+    public void ListMediaFiles_SameCreationAndModifiedDate_FallsBackToNameAscending()
+    {
+        var same = DateTime.Now.AddDays(-1);
+        var a = TempFile("a.jpg"); var b = TempFile("b.jpg");
+        SetTimes(a, same); SetTimes(b, same);
+
+        var result = _sut.ListMediaFiles(_root, offset: 0, limit: 100);
+
+        result.Select(Path.GetFileName)
+            .Should().ContainInOrder("a.jpg", "b.jpg");
+    }
+
+    private static void SetTimes(string path, DateTime time)
+    {
+        File.SetCreationTime(path, time);
+        File.SetLastWriteTime(path, time);
     }
 
     [Fact]
