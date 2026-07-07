@@ -156,6 +156,33 @@
             <Setter Property="Padding" Value="12,16"/>
         </Style>
 
+        <!-- ── Pending overlay close (✕) button ── -->
+        <Style Selector="Button.pending-close">
+            <Setter Property="Background" Value="#DDDAD4"/>
+            <Setter Property="Foreground" Value="#706E69"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.pending-close:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#E4E2DE"/>
+            <Setter Property="Foreground" Value="#706E69"/>
+        </Style>
+
+        <!-- ── Pending overlay cancel button ── -->
+        <Style Selector="Button.pending-cancel">
+            <Setter Property="Background" Value="#DDDAD4"/>
+            <Setter Property="Foreground" Value="#3A3835"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="24,9"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="Button.pending-cancel:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#E4E2DE"/>
+            <Setter Property="Foreground" Value="#3A3835"/>
+        </Style>
+
         <!-- ── Summary OK button ── -->
         <Style Selector="Button.summary-ok">
             <Setter Property="Background" Value="#1C1C1C"/>
@@ -557,16 +584,12 @@
                                Foreground="#1C1C1C"
                                VerticalAlignment="Center"/>
                     <Button Grid.Column="1"
+                            Classes="pending-close"
                             Command="{Binding CancelPipelineCommand}"
                             Width="26" Height="26"
                             Padding="0"
-                            Background="#DDDAD4"
-                            BorderThickness="0"
-                            CornerRadius="5"
                             HorizontalContentAlignment="Center"
-                            VerticalContentAlignment="Center"
-                            FontSize="12"
-                            Foreground="#706E69">✕</Button>
+                            VerticalContentAlignment="Center">✕</Button>
                 </Grid>
 
                 <!-- Device name · file count -->
@@ -609,32 +632,11 @@
                                Foreground="#A09D97"/>
                 </Grid>
 
-                <!-- Stage pills -->
-                <WrapPanel Orientation="Horizontal" Margin="0,0,0,24">
-                    <Border Classes="stage-pill"
-                            IsVisible="{Binding CurrentFileIsVideo}">
-                        <TextBlock Text="Convert" FontSize="11" Foreground="#706E69"/>
-                    </Border>
-                    <Border Classes="stage-pill"
-                            IsVisible="{Binding CurrentFileHasRotation}">
-                        <TextBlock Text="Rotate" FontSize="11" Foreground="#706E69"/>
-                    </Border>
-                    <Border Classes="stage-pill stage-pill-danger"
-                            IsVisible="{Binding CurrentFileHasDelete}">
-                        <TextBlock Text="Delete" FontSize="11" Foreground="#DC2626"/>
-                    </Border>
-                </WrapPanel>
-
                 <!-- Cancel button -->
-                <Button Command="{Binding CancelPipelineCommand}"
-                        HorizontalAlignment="Center"
-                        Padding="24,9"
-                        Background="#DDDAD4"
-                        BorderThickness="0"
-                        CornerRadius="6"
-                        FontSize="13"
-                        Foreground="#3A3835">
-                    ◻  Cancel
+                <Button Classes="pending-cancel"
+                        Command="{Binding CancelPipelineCommand}"
+                        HorizontalAlignment="Center">
+                    Cancel
                 </Button>
 
             </StackPanel>
