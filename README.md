@@ -408,7 +408,7 @@ The outermost layer. Contains all UI screens, controllers, and view models. It d
    - Records map directly onto immutable domain entities (`record DeviceProfile`, `record FileContext`). Sealed class hierarchies with pattern matching model pipeline stage results and naming tokens exhaustively — the compiler enforces that every case is handled. Nullable reference types catch missing EXIF data and unset paths at compile time rather than at runtime.
 
 2. **UI Framework:** Avalonia UI 11
-   - Cross-platform declarative UI defined in XAML with full data binding, control templates, and CSS-like styling. Runs natively on Windows, macOS, and Linux without a webview. The visual tree and layout model are close enough to WPF that existing .NET knowledge transfers directly. Avalonia's `Dispatcher` handles UI thread marshalling for progress updates from background tasks.
+   - Declarative UI defined in XAML with full data binding, control templates, and CSS-like styling. Runs natively on Windows without a webview. The visual tree and layout model are close enough to WPF that existing .NET knowledge transfers directly. Avalonia's `Dispatcher` handles UI thread marshalling for progress updates from background tasks.
 
 3. **Reactive / MVVM Layer:** ReactiveUI
    - View models expose `ObservableAsPropertyHelper` properties bound directly to the UI. Pipeline progress events, cancellation state, and run summary data flow from the application layer to the presentation layer as `IObservable<T>` streams — no manual `PropertyChanged` wiring. `ReactiveCommand` ties button actions to application-layer use cases with built-in can-execute logic and async execution.
@@ -432,7 +432,7 @@ The outermost layer. Contains all UI screens, controllers, and view models. It d
    - An embedded document database for .NET stored as a single `.db` file in the application data folder. Device profiles are stored as documents and queried via a LINQ-compatible API — sorting by name, filtering by source path, or any future query is a one-liner against the collection. No schema definition, no migrations, and no ORM mapping layer required. The infrastructure adapter remains thin and the domain model is untouched.
 
 10. **Distribution:** `dotnet publish --self-contained --single-file`
-    - Produces a single native executable per target platform with the .NET runtime bundled. The user downloads one file; no runtime installation is required. Code signing and notarisation for Windows and macOS follow standard platform tooling.
+    - Produces a single native Windows executable with the .NET runtime bundled. The user downloads one file; no runtime installation is required. Code signing follows standard Windows platform tooling.
 
 # Dependencies
 
@@ -441,8 +441,8 @@ The outermost layer. Contains all UI screens, controllers, and view models. It d
 | Package                                    | Purpose                                              |
 |--------------------------------------------|------------------------------------------------------|
 | .NET 9 SDK                                 | Language runtime, BCL, async/await, TPL              |
-| Avalonia 11                                | Cross-platform desktop UI framework                  |
-| Avalonia.Desktop                           | Native windowing host for Windows, macOS, Linux      |
+| Avalonia 11                                | Desktop UI framework                                 |
+| Avalonia.Desktop                           | Native windowing host for Windows                    |
 | Avalonia.Themes.Fluent                     | Built-in Fluent design theme                         |
 
 ## Reactive / MVVM
@@ -604,16 +604,15 @@ The outermost layer. Contains all UI screens, controllers, and view models. It d
 > *Make the app installable and runnable on a clean machine with no development tools installed.*
 
 **Tasks:**
-1. Configure `dotnet publish` with `--self-contained --single-file` for Windows (x64), macOS (arm64 + x64), and Linux (x64) targets.
+1. Configure `dotnet publish` with `--self-contained --single-file` for the Windows x64 target.
 2. Bundle the FFmpeg binary alongside the published executable via a post-build copy step.
 3. Create a Windows installer (`.msi`) using WiX Toolset or a simple NSIS script wrapping the single-file publish output.
-4. Create a macOS `.dmg` with a standard app bundle structure.
-5. Sign the Windows installer and notarise the macOS bundle.
-6. Write a one-page quick-start guide covering: installation, creating a first device profile, and running the first pipeline.
+4. Sign the Windows installer following standard code-signing tooling.
+5. Write a one-page quick-start guide covering: installation, creating a first device profile, and running the first pipeline.
 
 **Testing:**
-- Install the app on a clean virtual machine (Windows, macOS) with no .NET SDK, no FFmpeg, and no development tools present. Launch the app — verify it starts without errors.
+- Install the app on a clean Windows virtual machine with no .NET SDK, no FFmpeg, and no development tools present. Launch the app — verify it starts without errors.
 - On the clean machine: create a device profile, load a folder of real media, run the full pipeline. Verify output matches Phase 5 acceptance criteria.
 - Uninstall the app — verify no leftover files remain outside the application data folder.
 
-**Exit criteria:** A non-developer user can install the app from the distributed file, complete a full pipeline run, and uninstall it cleanly, without touching a terminal.
+**Exit criteria:** A non-developer user can install the app from the distributed Windows installer, complete a full pipeline run, and uninstall it cleanly, without touching a terminal.
