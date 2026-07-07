@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WixLocalization xmlns="http://wixtoolset.org/schemas/v4/wxl" Culture="en-us">
+  <!-- Overrides WixUI_InstallDir's stock text: this dialog picks the Start Menu
+       shortcut location (SHORTCUTDIR), not the app install folder. -->
+  <String Id="InstallDirDlgTitle" Value="{\WixUI_Font_Title}Shortcut Location" />
+  <String Id="InstallDirDlgDescription" Value="Click Next to create the shortcut in the default folder, or click Change to choose another location." />
+  <String Id="InstallDirDlgFolderLabel" Value="Create shortcut in:" />
+</WixLocalization>

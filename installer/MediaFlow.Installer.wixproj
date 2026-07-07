@@ -6,4 +6,8 @@
     <PublishDir>..\src\MediaFlow.Presentation\bin\Release\net8.0\win-x64\publish\</PublishDir>
     <DefineConstants>PublishDir=$(PublishDir)</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
+  </ItemGroup>
 </Project>
