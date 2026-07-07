@@ -16,6 +16,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
         Path.Combine(Path.GetTempPath(), $"MediaFlow.Temp.{Guid.NewGuid():N}");
 
     private readonly MediaLoaderAdapter _sut;
+    private readonly ILoadProgressObserver _observer = Substitute.For<ILoadProgressObserver>();
 
     public MediaLoaderAdapterTests()
     {
@@ -42,7 +43,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     [Fact]
     public async Task LoadBatchAsync_EmptyFolder_ReturnsEmptyList()
     {
-        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         result.Should().BeEmpty();
     }
@@ -52,7 +53,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         SourceFile("a.jpg"); SourceFile("b.jpg"); SourceFile("c.jpg");
 
-        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         result.Should().HaveCount(3);
     }
@@ -62,7 +63,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         SourceFile("a.jpg"); SourceFile("b.jpg"); SourceFile("c.jpg");
 
-        var result = await _sut.LoadBatchAsync(_sourceDir, offset: 1, limit: 1, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, offset: 1, limit: 1, _observer, default);
 
         result.Should().HaveCount(1);
         result[0].OriginalName.Should().Be("b.jpg");
@@ -75,7 +76,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         SourceFile("photo.jpg");
 
-        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         result[0].OriginalName.Should().Be("photo.jpg");
     }
@@ -85,7 +86,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         var path = SourceFile("photo.jpg");
 
-        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         result[0].SourcePath.Should().Be(path);
     }
@@ -95,7 +96,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         SourceFile("photo.jpg");
 
-        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         result[0].TempPath.Should().StartWith(_tempDir);
     }
@@ -105,7 +106,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         SourceFile("clip.mp4");
 
-        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         Path.GetExtension(result[0].TempPath).Should().Be(".mp4");
     }
@@ -115,7 +116,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         SourceFile("photo.jpg");
 
-        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         result[0].AssignedActions.Should().Be(MediaAction.None);
     }
@@ -125,7 +126,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         SourceFile("photo.jpg");
 
-        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         result[0].ExifCaptureDate.Should().BeNull();
     }
@@ -140,7 +141,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         SourceFile(name);
 
-        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         result[0].Type.Should().Be(FileType.Image);
     }
@@ -153,7 +154,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         SourceFile(name);
 
-        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         result[0].Type.Should().Be(FileType.Video);
     }
@@ -165,7 +166,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         SourceFile("photo.jpg");
 
-        await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         Directory.GetFiles(_tempDir).Should().HaveCount(1);
     }
@@ -175,7 +176,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         var path = SourceFile("photo.jpg");
 
-        await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         File.Exists(path).Should().BeTrue();
     }
@@ -185,7 +186,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         SourceFile("photo.jpg");
 
-        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         File.Exists(result[0].TempPath).Should().BeTrue();
     }
@@ -195,7 +196,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
     {
         SourceFile("a.jpg"); SourceFile("b.jpg");
 
-        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, default);
+        var result = await _sut.LoadBatchAsync(_sourceDir, 0, 10, _observer, default);
 
         result[0].TempPath.Should().NotBe(result[1].TempPath);
     }
@@ -209,7 +210,7 @@ public sealed class MediaLoaderAdapterTests : IDisposable
         using var cts = new CancellationTokenSource();
         cts.Cancel();
 
-        await _sut.Invoking(s => s.LoadBatchAsync(_sourceDir, 0, 10, cts.Token))
+        await _sut.Invoking(s => s.LoadBatchAsync(_sourceDir, 0, 10, _observer, cts.Token))
             .Should().ThrowAsync<OperationCanceledException>();
     }
 }

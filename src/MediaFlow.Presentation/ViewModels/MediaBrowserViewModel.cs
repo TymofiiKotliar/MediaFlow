@@ -29,6 +29,9 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     private bool _hasMore = true;
     private string? _loadError;
     private int _offset;
+    private string _loadingFileName = "";
+    private int _loadingIndex;
+    private int _loadingTotal;
     private FilterMode _filterMode = FilterMode.All;
     private SortMode   _sortModeDate   = SortMode.Desc;
     private SortMode   _sortModeName   = SortMode.Desc;
@@ -87,6 +90,47 @@ public sealed class MediaBrowserViewModel : ViewModelBase
     }
 
     public bool HasLoadError => _loadError is not null;
+
+    public string LoadingFileName
+    {
+        get => _loadingFileName;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _loadingFileName, value);
+            this.RaisePropertyChanged(nameof(LoadingStatusText));
+        }
+    }
+
+    public int LoadingIndex
+    {
+        get => _loadingIndex;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _loadingIndex, value);
+            this.RaisePropertyChanged(nameof(LoadingProgressPercent));
+            this.RaisePropertyChanged(nameof(LoadingStatusText));
+        }
+    }
+
+    public int LoadingTotal
+    {
+        get => _loadingTotal;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _loadingTotal, value);
+            this.RaisePropertyChanged(nameof(LoadingProgressPercent));
+            this.RaisePropertyChanged(nameof(LoadingStatusText));
+            this.RaisePropertyChanged(nameof(IsScanningFolder));
+        }
+    }
+
+    public double LoadingProgressPercent => LoadingTotal == 0 ? 0 : (double)LoadingIndex / LoadingTotal * 100;
+
+    public bool IsScanningFolder => LoadingTotal == 0;
+
+    public string LoadingStatusText => LoadingTotal == 0
+        ? "Scanning folder…"
+        : $"Loading {LoadingFileName}… ({LoadingIndex} of {LoadingTotal})";
 
     public bool IsPipelineRunning
     {
@@ -451,10 +495,20 @@ public sealed class MediaBrowserViewModel : ViewModelBase
         var ct = _cts.Token;
         IsLoading = true;
         LoadError = null;
+        LoadingFileName = "";
+        LoadingIndex = 0;
+        LoadingTotal = 0;
+
+        var observer = new LoadProgressObserver((name, index, total) =>
+        {
+            LoadingFileName = name;
+            LoadingIndex = index;
+            LoadingTotal = total;
+        });
 
         try
         {
-            var result = await _loadMedia.ExecuteAsync(_device, _offset, ct);
+            var result = await _loadMedia.ExecuteAsync(_device, _offset, observer, ct);
 
             switch (result)
             {

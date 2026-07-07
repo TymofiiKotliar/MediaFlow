@@ -5,5 +5,5 @@ namespace MediaFlow.Domain.Interfaces;
 public interface IMediaLoader
 {
     Task<IReadOnlyList<FileContext>> LoadBatchAsync(
-        string sourceFolderPath, int offset, int limit, CancellationToken ct);
+        string sourceFolderPath, int offset, int limit, ILoadProgressObserver observer, CancellationToken ct);
 }

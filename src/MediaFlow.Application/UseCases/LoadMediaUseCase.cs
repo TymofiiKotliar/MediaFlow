@@ -8,12 +8,13 @@ public sealed class LoadMediaUseCase(IMediaLoader loader)
     public async Task<LoadMediaResult> ExecuteAsync(
         DeviceProfile device,
         int offset,
+        ILoadProgressObserver observer,
         CancellationToken ct = default)
     {
         try
         {
             var files = await loader.LoadBatchAsync(
-                device.SourceFolderPath, offset, device.FilesPerLoad, ct);
+                device.SourceFolderPath, offset, device.FilesPerLoad, observer, ct);
 
             return new LoadMediaResult.Success(files);
         }

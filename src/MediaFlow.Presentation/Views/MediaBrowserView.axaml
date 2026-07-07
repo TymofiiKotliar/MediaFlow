@@ -542,9 +542,19 @@
                     VerticalAlignment="Top"
                     Background="#F5F3EF"
                     Padding="24,9">
-                <TextBlock Text="Loading files…"
-                           FontSize="12"
-                           Foreground="#706E69"/>
+                <StackPanel>
+                    <TextBlock Text="{Binding LoadingStatusText}"
+                               FontSize="12"
+                               Foreground="#706E69"
+                               Margin="0,0,0,6"/>
+                    <ProgressBar Value="{Binding LoadingProgressPercent}"
+                                 IsIndeterminate="{Binding IsScanningFolder}"
+                                 Minimum="0" Maximum="100"
+                                 Height="4"
+                                 CornerRadius="2"
+                                 Foreground="#1C1C1C"
+                                 Background="#E0DDD8"/>
+                </StackPanel>
             </Border>
 
             <!-- Source-not-accessible error -->
