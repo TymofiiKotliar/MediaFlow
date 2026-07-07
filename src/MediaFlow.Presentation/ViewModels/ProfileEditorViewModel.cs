@@ -25,6 +25,7 @@ public sealed class ProfileEditorViewModel : ViewModelBase
     private readonly BuildNamingTemplateUseCase _buildNaming;
     private readonly IDeviceProfilePictureStore _pictureStore;
     private readonly ITelegramBotVerifier _telegramBotVerifier;
+    private readonly ITelegramChatIdDetector _telegramChatIdDetector;
 
     private string? _editingId;
     private string _name = "";
@@ -97,6 +98,35 @@ public sealed class ProfileEditorViewModel : ViewModelBase
     public bool IsTelegramTokenValid => _telegramTokenStatus == TelegramTokenStatus.Valid;
     public bool IsTelegramTokenInvalid => _telegramTokenStatus == TelegramTokenStatus.Invalid;
     public bool ShowTelegramTokenStatus => _telegramTokenStatus != TelegramTokenStatus.Idle;
+
+    private ChatIdDetectionStatus _chatIdDetectionStatus = ChatIdDetectionStatus.Idle;
+    public ChatIdDetectionStatus ChatIdDetectionStatus
+    {
+        get => _chatIdDetectionStatus;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _chatIdDetectionStatus, value);
+            this.RaisePropertyChanged(nameof(IsDetectingChatId));
+            this.RaisePropertyChanged(nameof(DetectChatIdButtonText));
+            this.RaisePropertyChanged(nameof(ChatIdDetectionSucceeded));
+            this.RaisePropertyChanged(nameof(ChatIdDetectionFailed));
+            this.RaisePropertyChanged(nameof(ShowChatIdDetectionMessage));
+        }
+    }
+
+    public bool IsDetectingChatId => _chatIdDetectionStatus == ChatIdDetectionStatus.Detecting;
+    public bool ChatIdDetectionSucceeded => _chatIdDetectionStatus == ChatIdDetectionStatus.Succeeded;
+    public bool ChatIdDetectionFailed => _chatIdDetectionStatus == ChatIdDetectionStatus.Failed;
+    public bool ShowChatIdDetectionMessage => _chatIdDetectionStatus != ChatIdDetectionStatus.Idle;
+
+    public string DetectChatIdButtonText => IsDetectingChatId ? "Detecting…" : "Detect";
+
+    private string _chatIdDetectionMessage = "";
+    public string ChatIdDetectionMessage
+    {
+        get => _chatIdDetectionMessage;
+        private set => this.RaiseAndSetIfChanged(ref _chatIdDetectionMessage, value);
+    }
 
     public string FilesPerLoad
     {
@@ -224,6 +254,7 @@ public sealed class ProfileEditorViewModel : ViewModelBase
     public ReactiveCommand<ProfilePictureFitMode, Unit> SelectFitModeCommand { get; }
     public ReactiveCommand<Unit, Unit> SaveCommand { get; }
     public ReactiveCommand<Unit, Unit> CancelCommand { get; }
+    public ReactiveCommand<Unit, Unit> DetectChatIdCommand { get; }
 
     public event Action? SaveCompleted;
     public event Action? CancelRequested;
@@ -233,13 +264,15 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         EditDeviceUseCase edit,
         BuildNamingTemplateUseCase buildNaming,
         IDeviceProfilePictureStore pictureStore,
-        ITelegramBotVerifier telegramBotVerifier)
+        ITelegramBotVerifier telegramBotVerifier,
+        ITelegramChatIdDetector telegramChatIdDetector)
     {
         _register = register;
         _edit = edit;
         _buildNaming = buildNaming;
         _pictureStore = pictureStore;
         _telegramBotVerifier = telegramBotVerifier;
+        _telegramChatIdDetector = telegramChatIdDetector;
 
         Chips.CollectionChanged += (_, _) => UpdatePreview();
         Chips.Add(_cursor);
@@ -258,6 +291,12 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         SelectFitModeCommand = ReactiveCommand.Create<ProfilePictureFitMode>(mode => SelectedFitMode = mode);
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
         CancelCommand = ReactiveCommand.Create(() => CancelRequested?.Invoke());
+
+        var canDetectChatId = this.WhenAnyValue(
+            x => x.IsTelegramTokenValid,
+            x => x.IsDetectingChatId,
+            (valid, detecting) => valid && !detecting);
+        DetectChatIdCommand = ReactiveCommand.CreateFromTask(DetectChatIdAsync, canDetectChatId);
 
         this.WhenAnyValue(x => x.TelegramBotToken)
             .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
@@ -309,6 +348,26 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         }
     }
 
+    private async Task DetectChatIdAsync()
+    {
+        ChatIdDetectionStatus = ChatIdDetectionStatus.Detecting;
+        ChatIdDetectionMessage = "Detecting…";
+
+        var result = await _telegramChatIdDetector.DetectAsync(TelegramBotToken);
+        switch (result)
+        {
+            case TelegramChatIdDetected detected:
+                TelegramChatId = detected.ChatId;
+                ChatIdDetectionStatus = ChatIdDetectionStatus.Succeeded;
+                ChatIdDetectionMessage = $"✓ Found: {detected.ChatLabel}";
+                break;
+            case TelegramChatIdDetectionFailed failed:
+                ChatIdDetectionStatus = ChatIdDetectionStatus.Failed;
+                ChatIdDetectionMessage = $"✗ {failed.Reason}";
+                break;
+        }
+    }
+
     public void Initialize(DeviceProfile? profile)
     {
         _editingId = profile?.Id;
@@ -319,6 +378,8 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         TelegramChatId = profile?.TelegramChatId ?? "";
         TelegramTokenStatus = TelegramTokenStatus.Idle;
         TelegramTokenStatusText = "";
+        ChatIdDetectionStatus = ChatIdDetectionStatus.Idle;
+        ChatIdDetectionMessage = "";
         FilesPerLoad = (profile?.FilesPerLoad ?? 50).ToString();
         PrefixInput = "";
 

@@ -315,7 +315,7 @@
                 </Grid>
 
                 <!-- ── Files/Load | Bot Token | Chat ID ── -->
-                <Grid ColumnDefinitions="140,24,*,24,180" Margin="0,0,0,20">
+                <Grid ColumnDefinitions="140,24,*,24,240" Margin="0,0,0,20">
 
                     <StackPanel Grid.Column="0" Spacing="0">
                         <TextBlock Classes="field-label" Text="FILES / LOAD"/>
@@ -344,12 +344,24 @@
 
                     <StackPanel Grid.Column="4" Spacing="0">
                         <TextBlock Classes="field-label" Text="CHAT ID"/>
-                        <TextBox Text="{Binding TelegramChatId}"
-                                 Watermark="-1001234567890"
-                                 Classes.error="{Binding HasTelegramChatIdError}"/>
+                        <Grid ColumnDefinitions="*,8,Auto">
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding TelegramChatId}"
+                                     Watermark="-1001234567890"
+                                     Classes.error="{Binding HasTelegramChatIdError}"/>
+                            <Button Grid.Column="2"
+                                    Classes="browse"
+                                    Content="{Binding DetectChatIdButtonText}"
+                                    Command="{Binding DetectChatIdCommand}"/>
+                        </Grid>
                         <TextBlock Classes="field-error"
                                    Text="{Binding TelegramChatIdError}"
                                    IsVisible="{Binding HasTelegramChatIdError}"/>
+                        <TextBlock Classes="field-hint"
+                                   Classes.valid="{Binding ChatIdDetectionSucceeded}"
+                                   Classes.invalid="{Binding ChatIdDetectionFailed}"
+                                   Text="{Binding ChatIdDetectionMessage}"
+                                   IsVisible="{Binding ShowChatIdDetectionMessage}"/>
                     </StackPanel>
 
                 </Grid>

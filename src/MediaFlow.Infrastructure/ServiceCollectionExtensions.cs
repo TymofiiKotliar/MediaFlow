@@ -40,6 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IBackupStage, BackupStageAdapter>();
         services.AddSingleton<ITelegramStage, TelegramAdapter>();
         services.AddSingleton<ITelegramBotVerifier, TelegramBotVerifierAdapter>();
+        services.AddSingleton<ITelegramChatIdDetector, TelegramChatIdDetectorAdapter>();
 
         // ── Media loader (tempFolderPath is not a resolvable type, use factory) ─
         services.AddSingleton<IMediaLoader>(sp => new MediaLoaderAdapter(
