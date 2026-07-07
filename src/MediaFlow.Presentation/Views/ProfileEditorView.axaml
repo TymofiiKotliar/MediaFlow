@@ -154,6 +154,19 @@
             <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
 
+        <Style Selector="TextBlock.field-hint">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#A09D97"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style Selector="TextBlock.field-hint.valid">
+            <Setter Property="Foreground" Value="#16A34A"/>
+        </Style>
+        <Style Selector="TextBlock.field-hint.invalid">
+            <Setter Property="Foreground" Value="#DC2626"/>
+        </Style>
+
     </UserControl.Styles>
 
     <ScrollViewer>
@@ -322,6 +335,11 @@
                         <TextBlock Classes="field-error"
                                    Text="{Binding TelegramBotTokenError}"
                                    IsVisible="{Binding HasTelegramBotTokenError}"/>
+                        <TextBlock Classes="field-hint"
+                                   Classes.valid="{Binding IsTelegramTokenValid}"
+                                   Classes.invalid="{Binding IsTelegramTokenInvalid}"
+                                   Text="{Binding TelegramTokenStatusText}"
+                                   IsVisible="{Binding ShowTelegramTokenStatus}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="4" Spacing="0">

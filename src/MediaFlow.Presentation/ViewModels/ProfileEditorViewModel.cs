@@ -24,6 +24,7 @@ public sealed class ProfileEditorViewModel : ViewModelBase
     private readonly EditDeviceUseCase _edit;
     private readonly BuildNamingTemplateUseCase _buildNaming;
     private readonly IDeviceProfilePictureStore _pictureStore;
+    private readonly ITelegramBotVerifier _telegramBotVerifier;
 
     private string? _editingId;
     private string _name = "";
@@ -71,6 +72,31 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         get => _telegramChatId;
         set => this.RaiseAndSetIfChanged(ref _telegramChatId, value);
     }
+
+    private TelegramTokenStatus _telegramTokenStatus = TelegramTokenStatus.Idle;
+    public TelegramTokenStatus TelegramTokenStatus
+    {
+        get => _telegramTokenStatus;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _telegramTokenStatus, value);
+            this.RaisePropertyChanged(nameof(TelegramTokenStatusText));
+            this.RaisePropertyChanged(nameof(IsTelegramTokenValid));
+            this.RaisePropertyChanged(nameof(IsTelegramTokenInvalid));
+            this.RaisePropertyChanged(nameof(ShowTelegramTokenStatus));
+        }
+    }
+
+    private string _telegramTokenStatusText = "";
+    public string TelegramTokenStatusText
+    {
+        get => _telegramTokenStatusText;
+        private set => this.RaiseAndSetIfChanged(ref _telegramTokenStatusText, value);
+    }
+
+    public bool IsTelegramTokenValid => _telegramTokenStatus == TelegramTokenStatus.Valid;
+    public bool IsTelegramTokenInvalid => _telegramTokenStatus == TelegramTokenStatus.Invalid;
+    public bool ShowTelegramTokenStatus => _telegramTokenStatus != TelegramTokenStatus.Idle;
 
     public string FilesPerLoad
     {
@@ -206,12 +232,14 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         RegisterDeviceUseCase register,
         EditDeviceUseCase edit,
         BuildNamingTemplateUseCase buildNaming,
-        IDeviceProfilePictureStore pictureStore)
+        IDeviceProfilePictureStore pictureStore,
+        ITelegramBotVerifier telegramBotVerifier)
     {
         _register = register;
         _edit = edit;
         _buildNaming = buildNaming;
         _pictureStore = pictureStore;
+        _telegramBotVerifier = telegramBotVerifier;
 
         Chips.CollectionChanged += (_, _) => UpdatePreview();
         Chips.Add(_cursor);
@@ -231,7 +259,54 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
         CancelCommand = ReactiveCommand.Create(() => CancelRequested?.Invoke());
 
+        this.WhenAnyValue(x => x.TelegramBotToken)
+            .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
+            .DistinctUntilChanged()
+            // Property writes below must land on the UI thread — WhenAnyValue/Throttle/the
+            // async verify call all run on background schedulers, and this view binds
+            // TelegramTokenStatusText/Classes.valid/Classes.invalid, so mutating those off
+            // the UI thread corrupts Avalonia's visual tree instead of failing cleanly.
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Select(token =>
+            {
+                SetTelegramCheckingState(token);
+                return string.IsNullOrWhiteSpace(token)
+                    ? Observable.Empty<TelegramBotVerificationResult>()
+                    : Observable.FromAsync(ct => _telegramBotVerifier.VerifyAsync(token, ct))
+                        .ObserveOn(RxApp.MainThreadScheduler);
+            })
+            .Switch()
+            .Subscribe(ApplyTelegramVerificationResult);
+
         UpdatePreview();
+    }
+
+    private void SetTelegramCheckingState(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            TelegramTokenStatus = TelegramTokenStatus.Idle;
+            TelegramTokenStatusText = "";
+            return;
+        }
+
+        TelegramTokenStatus = TelegramTokenStatus.Checking;
+        TelegramTokenStatusText = "Checking…";
+    }
+
+    private void ApplyTelegramVerificationResult(TelegramBotVerificationResult result)
+    {
+        switch (result)
+        {
+            case TelegramBotVerified verified:
+                TelegramTokenStatus = TelegramTokenStatus.Valid;
+                TelegramTokenStatusText = $"✓ Connected as @{verified.BotUsername}";
+                break;
+            case TelegramBotVerificationFailed failed:
+                TelegramTokenStatus = TelegramTokenStatus.Invalid;
+                TelegramTokenStatusText = $"✗ {failed.Reason}";
+                break;
+        }
     }
 
     public void Initialize(DeviceProfile? profile)
@@ -242,6 +317,8 @@ public sealed class ProfileEditorViewModel : ViewModelBase
         BackupFolderPath = profile?.BackupFolderPath ?? "";
         TelegramBotToken = profile?.TelegramBotToken ?? "";
         TelegramChatId = profile?.TelegramChatId ?? "";
+        TelegramTokenStatus = TelegramTokenStatus.Idle;
+        TelegramTokenStatusText = "";
         FilesPerLoad = (profile?.FilesPerLoad ?? 50).ToString();
         PrefixInput = "";
 
