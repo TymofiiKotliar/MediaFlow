@@ -41,7 +41,7 @@
             <Setter Property="CornerRadius" Value="5"/>
         </Style>
         <Style Selector="Button.secondary:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#EAE7E0"/>
+            <Setter Property="Background" Value="#E3DFD5"/>
             <Setter Property="Foreground" Value="#1C1C1C"/>
         </Style>
         <Style Selector="Button.danger">

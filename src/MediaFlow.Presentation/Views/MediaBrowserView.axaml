@@ -619,14 +619,6 @@
                             IsVisible="{Binding CurrentFileHasRotation}">
                         <TextBlock Text="Rotate" FontSize="11" Foreground="#706E69"/>
                     </Border>
-                    <Border Classes="stage-pill"
-                            IsVisible="{Binding CurrentFileHasBackup}">
-                        <TextBlock Text="Backup" FontSize="11" Foreground="#706E69"/>
-                    </Border>
-                    <Border Classes="stage-pill"
-                            IsVisible="{Binding CurrentFileHasTelegram}">
-                        <TextBlock Text="Telegram" FontSize="11" Foreground="#706E69"/>
-                    </Border>
                     <Border Classes="stage-pill stage-pill-danger"
                             IsVisible="{Binding CurrentFileHasDelete}">
                         <TextBlock Text="Delete" FontSize="11" Foreground="#DC2626"/>
