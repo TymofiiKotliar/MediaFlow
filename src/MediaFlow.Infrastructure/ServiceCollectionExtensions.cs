@@ -1,3 +1,4 @@
+using FFMpegCore;
 using LiteDB;
 using MediaFlow.Application.UseCases;
 using MediaFlow.Domain.Interfaces;
@@ -18,6 +19,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMediaFlowServices(this IServiceCollection services)
     {
         AppPaths.EnsureCreated();
+
+        // Use the ffmpeg.exe bundled next to the app (see CopyFFmpegBinary in the
+        // Presentation csproj) instead of relying on FFmpeg being on the system PATH.
+        GlobalFFOptions.Configure(options => options.BinaryFolder = AppContext.BaseDirectory);
 
         // ── Database ──────────────────────────────────────────────────────────
         services.AddSingleton<ILiteDatabase>(_ => new LiteDatabase(AppPaths.DatabaseFile));

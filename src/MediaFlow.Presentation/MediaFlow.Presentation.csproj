@@ -8,6 +8,26 @@
     <ApplicationIcon>Assets\App-Icons\AppIconWindows.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
+  <!-- FFmpeg is an external native tool, not a NuGet package, so it isn't bundled by
+       dotnet publish automatically. This copies a locally-installed ffmpeg.exe next to
+       the published exe so the app runs standalone on a machine with no FFmpeg install. -->
+  <PropertyGroup>
+    <FFmpegBinaryPath Condition="'$(FFmpegBinaryPath)' == ''">C:\ffmpeg\bin\ffmpeg.exe</FFmpegBinaryPath>
+  </PropertyGroup>
+
+  <Target Name="CopyFFmpegBinary" AfterTargets="Publish">
+    <Error Condition="!Exists('$(FFmpegBinaryPath)')"
+           Text="FFmpeg binary not found at '$(FFmpegBinaryPath)'. Pass -p:FFmpegBinaryPath=&lt;path to ffmpeg.exe&gt; or install FFmpeg to that location." />
+    <Copy SourceFiles="$(FFmpegBinaryPath)" DestinationFolder="$(PublishDir)" />
+  </Target>
+
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />

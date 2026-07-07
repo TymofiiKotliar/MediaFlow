@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -20,6 +20,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaFlow.Application.Tests", "tests\MediaFlow.Application.Tests\MediaFlow.Application.Tests.csproj", "{2CECFABA-3F80-4958-9479-94590A6A3C74}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaFlow.Infrastructure.Tests", "tests\MediaFlow.Infrastructure.Tests\MediaFlow.Infrastructure.Tests.csproj", "{C42CBFDF-3461-4250-AAC7-6BD4EC3BDD40}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "installer", "installer", "{D4DF1830-B7AA-4AF1-9522-02E10AE647FA}"
+EndProject
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "MediaFlow.Installer", "installer\MediaFlow.Installer.wixproj", "{54A5A129-138D-45AF-AD59-394A40D2BA94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +62,10 @@ Global
 		{C42CBFDF-3461-4250-AAC7-6BD4EC3BDD40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C42CBFDF-3461-4250-AAC7-6BD4EC3BDD40}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C42CBFDF-3461-4250-AAC7-6BD4EC3BDD40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54A5A129-138D-45AF-AD59-394A40D2BA94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54A5A129-138D-45AF-AD59-394A40D2BA94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54A5A129-138D-45AF-AD59-394A40D2BA94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54A5A129-138D-45AF-AD59-394A40D2BA94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{07288D0A-5065-4631-881B-A1F318529277} = {4ABE02C2-6215-4038-88D1-5519546346AD}
@@ -67,5 +75,6 @@ Global
 		{AE362267-670B-4072-A813-79DD56A3D433} = {D130ABC2-136C-4F0A-8EA9-35749F75139C}
 		{2CECFABA-3F80-4958-9479-94590A6A3C74} = {D130ABC2-136C-4F0A-8EA9-35749F75139C}
 		{C42CBFDF-3461-4250-AAC7-6BD4EC3BDD40} = {D130ABC2-136C-4F0A-8EA9-35749F75139C}
+		{54A5A129-138D-45AF-AD59-394A40D2BA94} = {D4DF1830-B7AA-4AF1-9522-02E10AE647FA}
 	EndGlobalSection
 EndGlobal

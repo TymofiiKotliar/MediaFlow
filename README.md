@@ -432,7 +432,7 @@ The outermost layer. Contains all UI screens, controllers, and view models. It d
    - An embedded document database for .NET stored as a single `.db` file in the application data folder. Device profiles are stored as documents and queried via a LINQ-compatible API — sorting by name, filtering by source path, or any future query is a one-liner against the collection. No schema definition, no migrations, and no ORM mapping layer required. The infrastructure adapter remains thin and the domain model is untouched.
 
 10. **Distribution:** `dotnet publish --self-contained --single-file`
-    - Produces a single native Windows executable with the .NET runtime bundled. The user downloads one file; no runtime installation is required. Code signing follows standard Windows platform tooling.
+    - Produces a single native Windows executable with the .NET runtime bundled. The user downloads one file; no runtime installation is required.
 
 # Dependencies
 
@@ -607,8 +607,7 @@ The outermost layer. Contains all UI screens, controllers, and view models. It d
 1. Configure `dotnet publish` with `--self-contained --single-file` for the Windows x64 target.
 2. Bundle the FFmpeg binary alongside the published executable via a post-build copy step.
 3. Create a Windows installer (`.msi`) using WiX Toolset or a simple NSIS script wrapping the single-file publish output.
-4. Sign the Windows installer following standard code-signing tooling.
-5. Write a one-page quick-start guide covering: installation, creating a first device profile, and running the first pipeline.
+4. Write a one-page quick-start guide covering: installation, creating a first device profile, and running the first pipeline.
 
 **Testing:**
 - Install the app on a clean Windows virtual machine with no .NET SDK, no FFmpeg, and no development tools present. Launch the app — verify it starts without errors.
