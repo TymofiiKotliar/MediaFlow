@@ -29,7 +29,9 @@ public sealed class VideoConversionStageAdapter : IVideoConversionStage
                 .OutputToFile(outputPath, overwrite: true, options => options
                     .WithVideoCodec(VideoCodec.LibX264)
                     .WithAudioCodec(AudioCodec.Aac)
-                    .WithConstantRateFactor(23))
+                    .WithConstantRateFactor(23)
+                    .WithCustomArgument("-vf yadif=deint=interlaced -profile:v main -level 3.1")
+                    .ForcePixelFormat("yuv420p"))
                 .CancellableThrough(ct)
                 .ProcessAsynchronously();
 

@@ -1,4 +1,5 @@
 using FFMpegCore;
+using FFMpegCore.Enums;
 using MediaFlow.Domain.Entities;
 using MediaFlow.Domain.Enums;
 using MediaFlow.Domain.Interfaces;
@@ -23,12 +24,26 @@ public sealed class RotationStageAdapter : IRotationStage
         var ext = Path.GetExtension(inputPath);
         var outputPath = inputPath[..^ext.Length] + ".processing" + ext;
 
+        var isVideo = context.File.Type == FileType.Video;
+
         try
         {
             await FFMpegArguments
                 .FromFileInput(inputPath)
                 .OutputToFile(outputPath, overwrite: true, options =>
-                    options.WithCustomArgument($"-vf {BuildFilter(actions)}"))
+                {
+                    options.WithCustomArgument($"-vf {BuildFilter(actions, isVideo)}");
+
+            
+                    if (isVideo)
+                    {
+                        options
+                            .WithCustomArgument("-profile:v main -level 3.1")
+                            .WithVideoCodec(VideoCodec.LibX264)
+                            .WithAudioCodec(AudioCodec.Aac)
+                            .ForcePixelFormat("yuv420p");
+                    }
+                })
                 .CancellableThrough(ct)
                 .ProcessAsynchronously();
 
@@ -50,10 +65,12 @@ public sealed class RotationStageAdapter : IRotationStage
         }
     }
 
-    private static string BuildFilter(MediaAction actions)
+    private static string BuildFilter(MediaAction actions, bool isVideo)
     {
-        if (actions.HasFlag(MediaAction.RotateLeft))  return "transpose=2";
-        if (actions.HasFlag(MediaAction.RotateRight)) return "transpose=1";
-        return "hflip,vflip"; // Flip180
+        var orientation = actions.HasFlag(MediaAction.RotateLeft)  ? "transpose=2"
+            : actions.HasFlag(MediaAction.RotateRight)             ? "transpose=1"
+            : "hflip,vflip"; // Flip180
+
+        return isVideo ? $"yadif=deint=interlaced,{orientation}" : orientation;
     }
 }
